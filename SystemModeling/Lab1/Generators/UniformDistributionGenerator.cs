@@ -27,7 +27,8 @@ internal class UniformDistributionGenerator : IGenerator
         for (var i = 0; i < _options.Amount; i++)
         {
             z = _options.A * z % _options.C;
-            nums[i] = z / _options.C;
+            var generatedNumber = z / _options.C;
+            nums[i] = generatedNumber;
         }
 
         return ValueTask.FromResult(nums);

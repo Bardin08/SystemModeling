@@ -31,9 +31,9 @@ internal class NormalDistributionGenerator : IGenerator
             var s = GetSum(sumNumsAmount);
 
             var m = s - 6;
-            var num = _options.Sigma * m + _options.A;
+            var generatedNum = _options.Sigma * m + _options.A;
 
-            nums[i] = num;
+            nums[i] = generatedNum;
         }
 
         return ValueTask.FromResult(nums);

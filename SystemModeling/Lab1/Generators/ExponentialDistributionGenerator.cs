@@ -25,8 +25,8 @@ internal class ExponentialDistributionGenerator : IGenerator
         for (var i = 0; i < _options.Amount; i++)
         {
             var r = Random.Shared.NextDouble();
-            var r1 = -1 * (Math.Log(r) / _options.Lambda);
-            nums[i] = r1;
+            var generatedNumber = -1 * (Math.Log(r) / _options.Lambda);
+            nums[i] = generatedNumber;
         }
 
         return ValueTask.FromResult(nums);
