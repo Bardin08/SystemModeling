@@ -1,5 +1,5 @@
-﻿using SystemModeling.Lab1.Generators.Options;
-using SystemModeling.Lab1.Interfaces;
+﻿using SystemModeling.Lab1.Generators.Interfaces;
+using SystemModeling.Lab1.Generators.Options;
 
 namespace SystemModeling.Lab1.Generators;
 

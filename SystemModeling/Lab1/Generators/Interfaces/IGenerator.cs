@@ -1,4 +1,4 @@
-﻿namespace SystemModeling.Lab1.Interfaces;
+﻿namespace SystemModeling.Lab1.Generators.Interfaces;
 
 internal interface IGenerator
 {
