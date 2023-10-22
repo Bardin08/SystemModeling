@@ -1,6 +1,6 @@
 ﻿namespace SystemModeling.Lab1.Visualization.Options;
 
-internal record ConsoleVisualizationOptions : VisualizationOptionsBase
+internal record HistogramVisualizationOptions
 {
     public int Buckets { get; init; } = 20;
     public double MinValue { get; init; }

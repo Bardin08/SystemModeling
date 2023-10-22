@@ -1,31 +1,44 @@
-﻿using SystemModeling.Lab1.Interfaces;
+﻿using SystemModeling.Lab1.Visualization.Interfaces;
 using SystemModeling.Lab1.Visualization.Options;
 
 namespace SystemModeling.Lab1.Visualization;
 
-internal class ConsoleVisualizer : IVisualizer
+internal class ConsoleVisualizer : IHistogramVisualizer, IFrequencyTableVisualizer
 {
-    private readonly ConsoleVisualizationOptions _options;
-
-    public ConsoleVisualizer(ConsoleVisualizationOptions options)
+    public ValueTask VisualizeFrequencyTableAsync(double[] data, FrequencyTableVisualizerOptions options)
     {
-        _options = options;
+        var min = data.Min();
+        var max = data.Max();
+
+        var bucketRange = (max - min) / options.Buckets;
+
+        var buckets = SplitDataToBuckets(data, bucketRange, min, options.Buckets);
+
+        for (var i = 0; i < options.Buckets; i++)
+        {
+            var bucketMin = min + i * bucketRange;
+            var bucketMax = bucketMin + bucketRange;
+            Console.Write($"{bucketMin,6:0.0} - {bucketMax,6:0.0} : {buckets[i]} ");
+            Console.WriteLine();
+        }
+
+        return ValueTask.CompletedTask;
     }
 
-    public ValueTask VisualizeAsync(IEnumerable<double> data)
+    public ValueTask VisualizeHistogramAsync(double[] data, HistogramVisualizationOptions options)
     {
-        var bucketRange = (_options.MaxValue - _options.MinValue) / _options.Buckets;
+        var bucketRange = (options.MaxValue - options.MinValue) / options.Buckets;
 
-        var buckets = SplitDataToBuckets(data, bucketRange);
+        var buckets = SplitDataToBuckets(data, bucketRange, options.MinValue, options.Buckets);
 
         var maxFrequency = buckets.Prepend(0).Max();
 
-        var scaleFactor = _options.MaxCharsPerLine / (double)maxFrequency;
+        var scaleFactor = options.MaxCharsPerLine / (double)maxFrequency;
 
-        switch (_options.Mode)
+        switch (options.Mode)
         {
             case VisualizationMode.Vertical:
-                PrintVertical(buckets, scaleFactor, bucketRange);
+                PrintVertical(buckets, scaleFactor, bucketRange, options.MinValue);
                 break;
             case VisualizationMode.Horizontal:
                 PrintHorizontal(buckets, maxFrequency, scaleFactor, bucketRange);
@@ -37,15 +50,16 @@ internal class ConsoleVisualizer : IVisualizer
         return ValueTask.CompletedTask;
     }
 
-    private int[] SplitDataToBuckets(IEnumerable<double> data, double bucketRange)
+    private int[] SplitDataToBuckets(IEnumerable<double> data,
+        double bucketRange, double minValue, int bucketsAmount)
     {
-        var buckets = new int[_options.Buckets];
+        var buckets = new int[bucketsAmount];
 
         foreach (var value in data)
         {
-            var bucketIndex = (int)((value - _options.MinValue) / bucketRange);
+            var bucketIndex = (int)((value - minValue) / bucketRange);
 
-            if (bucketIndex >= 0 && bucketIndex < _options.Buckets)
+            if (bucketIndex >= 0 && bucketIndex < bucketsAmount)
             {
                 buckets[bucketIndex]++;
             }
@@ -54,11 +68,11 @@ internal class ConsoleVisualizer : IVisualizer
         return buckets;
     }
 
-    private void PrintVertical(int[] buckets, double scaleFactor, double bucketRange)
+    private void PrintVertical(int[] buckets, double scaleFactor, double bucketRange, double minValue)
     {
-        for (var i = 0; i < _options.Buckets; i++)
+        for (var i = 0; i < buckets.Length; i++)
         {
-            var bucketMin = _options.MinValue + i * bucketRange;
+            var bucketMin = minValue + i * bucketRange;
             var bucketMax = bucketMin + bucketRange;
             Console.Write($"{bucketMin,6:0.0} - {bucketMax,6:0.0} : ");
 
@@ -77,20 +91,21 @@ internal class ConsoleVisualizer : IVisualizer
     {
         for (var i = (int)(maxFrequency * scaleFactor); i > 0; i--)
         {
-            for (var j = 0; j < _options.Buckets; j++)
+            foreach (var bucket in buckets)
             {
-                Console.Write("{0,4}", (int)(buckets[j] * scaleFactor) >= i ? "@" : " ");
+                Console.Write("{0,4}", (int)(bucket * scaleFactor) >= i ? "@" : " ");
             }
+
             Console.WriteLine();
         }
 
-        for (var i = 0; i < _options.Buckets; i++)
+        for (var i = 0; i < buckets.Length; i++)
         {
             Console.Write("{0,4}", "----");
         }
         Console.WriteLine();
 
-        for (var i = 0; i < _options.Buckets; i++)
+        for (var i = 0; i < buckets.Length; i++)
         {
             Console.Write("{0,4:0.0}", bucketRange * i);
         }
