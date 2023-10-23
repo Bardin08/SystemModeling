@@ -2,5 +2,5 @@
 
 internal abstract record GeneratorOptionsBase
 {
-    public int Amount { get; init; }
+    public int Amount { get; set; }
 }

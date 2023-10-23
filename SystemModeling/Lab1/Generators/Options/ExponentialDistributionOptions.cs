@@ -2,5 +2,5 @@
 
 internal record ExponentialDistributionOptions : GeneratorOptionsBase
 {
-    public double Lambda { get; init; }
+    public double Lambda { get; set; }
 }
