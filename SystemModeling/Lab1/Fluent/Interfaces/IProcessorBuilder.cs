@@ -4,5 +4,6 @@ internal interface IProcessorBuilder
 {
     IDatasetGeneratorSelectionStage Generate();
     IAnalyticsStepsSelectionStage Analyze();
+    IVisualizersSelectionStage Visualize();
     Processor Build();
 }

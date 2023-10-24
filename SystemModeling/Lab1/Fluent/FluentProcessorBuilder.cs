@@ -24,11 +24,20 @@ internal partial class FluentProcessorBuilder :
         return this;
     }
 
+    public IVisualizersSelectionStage Visualize()
+    {
+        return this;
+    }
+
     public Processor Build()
     {
         ArgumentNullException.ThrowIfNull(_generator);
         ArgumentNullException.ThrowIfNull(_analyticsProcessor);
+        ArgumentNullException.ThrowIfNull(_visualizationProcessor);
 
-        return new Processor(_generator, _analyticsProcessor);
+        return new Processor(
+            _generator,
+            _analyticsProcessor,
+            _visualizationProcessor);
     }
 }

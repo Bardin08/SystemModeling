@@ -2,7 +2,7 @@
 
 namespace SystemModeling.Lab1.Fluent.Interfaces;
 
-internal interface IAnalyticsStepsSelectionStage
+internal partial interface IAnalyticsStepsSelectionStage
 {
     IProcessorBuilder AddCollectors(Action<AnalyticsProcessorBuilder> action);
 }

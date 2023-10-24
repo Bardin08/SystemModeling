@@ -1,5 +1,6 @@
 ﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
 using SystemModeling.Lab1.Fluent;
+using SystemModeling.Lab1.Visualization.Options;
 
 var processor = FluentProcessorBuilder
     .CreateBuilder()
@@ -17,6 +18,20 @@ var processor = FluentProcessorBuilder
             .CalculateMeanAndVariance()
             .CalculateChiSquare(new DataFilteringOptions { Threshold = 20 });
     })
+    .Visualize()
+    .AddVisualizers(vb =>
+    {
+        // vb.AddStatisticsVisualization();
+        vb.AddFrequencyMapVisualization();
+        vb.AddHistogramVisualization(opt =>
+        {
+            opt.Buckets = 15;
+            opt.MinValue = 0;
+            opt.MaxValue = 5;
+            opt.MaxCharsPerLine = 15;
+            opt.Mode = VisualizationMode.Horizontal;
+        });
+    })
     .Build();
 
 await processor.Generate();
@@ -28,6 +43,5 @@ if (stats is null)
     return;
 }
 
-Console.WriteLine("Statistics information:");
-Console.WriteLine("Mean: {0,6:0.00}", stats.Mean);
-Console.WriteLine("Variance: {0,6:0.00}", stats.Variance);
+await processor.Visualize(stats);
+await processor.Visualize(stats.FrequencyMap);

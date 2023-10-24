@@ -2,9 +2,9 @@
 
 internal record HistogramVisualizationOptions
 {
-    public int Buckets { get; init; } = 20;
-    public double MinValue { get; init; }
-    public double MaxValue { get; init; } = 5;
-    public int MaxCharsPerLine { get; init; } = 20;
-    public VisualizationMode Mode { get; init; }
+    public int Buckets { get; set; } = 20;
+    public double MinValue { get; set; }
+    public double MaxValue { get; set; } = 5;
+    public int MaxCharsPerLine { get; set; } = 20;
+    public VisualizationMode Mode { get; set; }
 }
