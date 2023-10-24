@@ -11,7 +11,7 @@ internal class AnalyticsProcessor : IAnalyticsProcessor
         _analyzingSteps = analyzingSteps;
     }
 
-    public async Task<StatisticsDto?> AnalyzeAsync(double[]? data)
+    public async Task<StatisticsDto?> AnalyzeAsync(double[]? data, object generatorSettings)
     {
         if (data is null || !data.Any())
         {
@@ -20,7 +20,8 @@ internal class AnalyticsProcessor : IAnalyticsProcessor
 
         var ctx = new AnalyticsContext()
         {
-            Data = data
+            Data = data,
+            GeneratorSettings = generatorSettings
         };
 
         return StatisticsDto.FromAnalyzingContext(

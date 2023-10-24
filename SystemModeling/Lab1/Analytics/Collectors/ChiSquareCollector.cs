@@ -1,5 +1,6 @@
 ﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
 using SystemModeling.Lab1.Analytics.Interfaces;
+using SystemModeling.Lab1.Generators.Options;
 
 namespace SystemModeling.Lab1.Analytics.Collectors;
 
@@ -19,16 +20,15 @@ internal class ChiSquareCollector : IStatisticsCollector
             return Task.FromResult<object?>(null);
         }
 
-        var filteredFrequencyMap = new SortedSet<FrequencyMapBucket>(
-            Comparer<FrequencyMapBucket>.Default);
-        foreach (var bucket in context.FrequencyMap
-                     .Where(bucket => bucket.ItemsAmount >= _dataFilteringOptions.Threshold))
+        var chiSquare = context.GeneratorSettings switch
         {
-            filteredFrequencyMap.Add(bucket);
-        }
-
-        var chiSquare = new NormalDistributionChiCalculationStrategy()
-            .GetChi(filteredFrequencyMap);
+            UniformDistributionOptions => new UniformDistributionChiCalculationStrategy(_dataFilteringOptions)
+                .GetChi(context),
+            NormalDistributionOptions => new NormalDistributionChiCalculationStrategy(_dataFilteringOptions)
+                .GetChi(context),
+            _ => new ExponentialDistributionChiCalculationStrategy(_dataFilteringOptions)
+                .GetChi(context)
+        };
 
         return Task.FromResult<object?>(chiSquare);
     }

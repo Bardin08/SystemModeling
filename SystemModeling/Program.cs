@@ -5,10 +5,9 @@ using SystemModeling.Lab1.Visualization.Options;
 var processor = FluentProcessorBuilder
     .CreateBuilder()
     .Generate()
-    .WithUniformDistribution(opt =>
+    .WithExponentialDistribution(opt =>
     {
-        opt.A = 5^13;
-        opt.C = 2^31;
+        opt.Lambda = .5;
         opt.Amount = 10000;
     })
     .Analyze()
@@ -16,12 +15,12 @@ var processor = FluentProcessorBuilder
     {
         ab.BuildFrequencyMap(new FrequencyMapOptions { Buckets = 15 })
             .CalculateMeanAndVariance()
-            .CalculateChiSquare(new DataFilteringOptions { Threshold = 20 });
+            .CalculateChiSquare(new DataFilteringOptions { Threshold = 3 });
     })
     .Visualize()
     .AddVisualizers(vb =>
     {
-        // vb.AddStatisticsVisualization();
+        vb.AddStatisticsVisualization();
         vb.AddFrequencyMapVisualization();
         vb.AddHistogramVisualization(opt =>
         {

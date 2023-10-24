@@ -31,4 +31,9 @@ internal class ExponentialDistributionGenerator : IGenerator
 
         return ValueTask.FromResult(nums);
     }
+
+    public object GetOptions()
+    {
+        return _options;
+    }
 }

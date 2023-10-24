@@ -51,4 +51,9 @@ internal class NormalDistributionGenerator : IGenerator
 
         return sum;
     }
+
+    public object GetOptions()
+    {
+        return _options;
+    }
 }

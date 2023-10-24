@@ -17,6 +17,8 @@ internal class StatisticsVisualizer : IVisualizer
         System.Console.WriteLine("Statistics information:");
         System.Console.WriteLine("Mean: {0,6:0.00}", stats.Mean);
         System.Console.WriteLine("Variance: {0,6:0.00}", stats.Variance);
+        System.Console.WriteLine("Chi Square: {0,6:0.00}", stats.ChiSquare);
+        System.Console.WriteLine("Freedom Degree: {0,6:0.00}", stats.FreedomDegree);
 
         return Task.CompletedTask;
     }

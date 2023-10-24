@@ -2,5 +2,5 @@
 
 internal interface IAnalyticsProcessor
 {
-    Task<StatisticsDto?> AnalyzeAsync(double[] data);
+    Task<StatisticsDto?> AnalyzeAsync(double[] data, object generatorSettings);
 }

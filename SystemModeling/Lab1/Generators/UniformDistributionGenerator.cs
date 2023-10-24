@@ -33,4 +33,9 @@ internal class UniformDistributionGenerator : IGenerator
 
         return ValueTask.FromResult(nums);
     }
+
+    public object GetOptions()
+    {
+        return _options;
+    }
 }

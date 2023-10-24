@@ -3,4 +3,5 @@
 internal interface IGenerator
 {
     ValueTask<double[]> Generate();
+    object GetOptions();
 }

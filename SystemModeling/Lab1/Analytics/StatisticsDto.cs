@@ -7,6 +7,7 @@ internal record StatisticsDto
     public double Mean { get; init; }
     public double Variance { get; init; }
     public double ChiSquare { get; set; }
+    public int FreedomDegree { get; set; }
     public SortedSet<FrequencyMapBucket>? FrequencyMap { get; set; }
 
     internal static StatisticsDto FromAnalyzingContext(AnalyticsContext context)
@@ -16,7 +17,8 @@ internal record StatisticsDto
             FrequencyMap = context.FrequencyMap,
             Mean = context.Mean.GetValueOrDefault(),
             Variance = context.Variance.GetValueOrDefault(),
-            ChiSquare = context.ChiSquare.GetValueOrDefault()
+            ChiSquare = context.ChiSquare.GetValueOrDefault(),
+            FreedomDegree = context.FreedomDegree.GetValueOrDefault()
         };
     }
 }

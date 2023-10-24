@@ -30,7 +30,7 @@ internal class Processor
     public async Task<StatisticsDto?> Analyze()
     {
         ArgumentNullException.ThrowIfNull(_data);
-        return await _analyticsProcessor.AnalyzeAsync(_data);
+        return await _analyticsProcessor.AnalyzeAsync(_data, _generator.GetOptions());
     }
 
     public async Task Visualize<TData>(TData data)
