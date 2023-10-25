@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The `Lab1` directory is part of the SystemModeling repository and serves as a comprehensive data generation, analytics, and visualization suite.
+The `Lab1` directory is part of the SystemModeling repository and is a comprehensive data generation, analytics, and visualization suite.
 
 ## How to Run
 
@@ -32,7 +32,7 @@ To run the functionalities in this directory, use the `Lab1Runnable` class from 
 
 ### Generators
 
-Each generator has its own set of configurable options in the `Generators/Options` directory.
+Each generator has configurable options in the `Generators/Options` directory.
 
 ### Analytics
 
@@ -44,5 +44,5 @@ The `VisualizationProcessor` class handles visualization, and options can be con
 
 ## Repository Link
 
-For more details, you can visit the [SystemModeling Repository Lab1](https://github.com/Bardin08/SystemModeling/Lab1).
+For more details, visit the [SystemModeling Repository Lab1](https://github.com/Bardin08/SystemModeling/tree/master/SystemModeling/Lab1).
 
