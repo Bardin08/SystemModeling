@@ -1,6 +1,7 @@
-﻿using SystemModeling.Lab1.Generators.Options;
+﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
+using SystemModeling.Lab1.Generators.Options;
 
-namespace SystemModeling.Lab1.Analytics.Collectors.Options;
+namespace SystemModeling.Lab1.Analytics.Collectors.Helpers;
 
 internal class ExponentialDistributionChiCalculationStrategy : ChiCalculationBaseStrategy
 {

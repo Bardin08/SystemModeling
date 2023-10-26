@@ -1,4 +1,6 @@
-﻿namespace SystemModeling.Lab1.Analytics.Collectors.Options;
+﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
+
+namespace SystemModeling.Lab1.Analytics.Collectors.Helpers;
 
 internal class UniformDistributionChiCalculationStrategy : ChiCalculationBaseStrategy
 {

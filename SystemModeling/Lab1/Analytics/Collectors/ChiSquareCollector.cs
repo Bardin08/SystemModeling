@@ -1,4 +1,5 @@
-﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
+﻿using SystemModeling.Lab1.Analytics.Collectors.Helpers;
+using SystemModeling.Lab1.Analytics.Collectors.Options;
 using SystemModeling.Lab1.Analytics.Interfaces;
 using SystemModeling.Lab1.Generators.Options;
 

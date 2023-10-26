@@ -1,7 +1,7 @@
 ﻿using SystemModeling.Lab1.Analytics.Collectors.Options;
 using SystemModeling.Lab1.Analytics.Interfaces;
 
-namespace SystemModeling.Lab1.Analytics.Collectors;
+namespace SystemModeling.Lab1.Analytics.Collectors.Helpers;
 
 internal abstract class ChiCalculationBaseStrategy : IChiCalculationStrategy
 {
