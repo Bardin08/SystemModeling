@@ -5,9 +5,9 @@ namespace SystemModeling.Lab1.Analytics.Infrastructure;
 
 internal class CalculateChiSquareStep : BaseAnalyzingStep
 {
-    private readonly ChiSquareCollector _collector;
+    private readonly IStatisticsCollector _collector;
 
-    public CalculateChiSquareStep(ChiSquareCollector collector)
+    public CalculateChiSquareStep(IStatisticsCollector collector)
     {
         _collector = collector;
     }

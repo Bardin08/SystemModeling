@@ -1,42 +1,27 @@
-﻿using SystemModeling.Lab1.Analytics.Interfaces;
+﻿namespace SystemModeling.Lab1.Analytics.Collectors.Options;
 
-namespace SystemModeling.Lab1.Analytics.Collectors.Options;
-
-internal class UniformDistributionChiCalculationStrategy : IChiCalculationStrategy
+internal class UniformDistributionChiCalculationStrategy : ChiCalculationBaseStrategy
 {
-    private readonly DataFilteringOptions _dataFilteringOptions;
-
-    public UniformDistributionChiCalculationStrategy(DataFilteringOptions dataFilteringOptions)
+    public UniformDistributionChiCalculationStrategy(
+        DataFilteringOptions dataFilteringOptions) : base(dataFilteringOptions)
     {
-        _dataFilteringOptions = dataFilteringOptions;
     }
 
-    public ChiSquareDto GetChi(AnalyticsContext context)
+    public override ChiSquareDto GetChi(AnalyticsContext context)
     {
-        var detailedFrequencyMap = context.Data
-            .ToLookup(x => x, x => x + 1)
-            .ToDictionary(x => x.Key, x => x.Count());
+        var requiredData = GetFrequencyMap(context.Data);
+        var theoreticalFrequency = requiredData.totalElements / requiredData.filteredIntervals;
 
-        var theoreticalFrequency = detailedFrequencyMap.Sum(x => x.Value) / detailedFrequencyMap.Count;
-
-        var filteredFrequencyMap = new Dictionary<double, int>();
-        foreach (var bucket in detailedFrequencyMap
-                     .Where(bucket => bucket.Value >= _dataFilteringOptions.Threshold))
-        {
-            filteredFrequencyMap.TryAdd(bucket.Key, bucket.Value);
-        }
-
-        var freedomDegree = filteredFrequencyMap.Count - 1;
         var chiSquare = 0d;
-        foreach (var realFrequency in filteredFrequencyMap.Select(bucket => bucket.Value))
+        foreach (var item in requiredData.filteredFrequencyMap)
         {
-            chiSquare = Math.Pow(realFrequency - theoreticalFrequency, 2) / theoreticalFrequency;
+            chiSquare = Math.Pow(item.Value - theoreticalFrequency, 2) / theoreticalFrequency;
         }
 
         return new ChiSquareDto
         {
             ChiSquare = chiSquare,
-            FreedomDegree = freedomDegree
+            FreedomDegree = requiredData.freedomDegree
         };
     }
 }
