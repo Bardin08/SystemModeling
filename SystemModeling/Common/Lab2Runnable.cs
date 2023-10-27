@@ -18,7 +18,7 @@ public class Lab2Runnable : IRunnable
         await new ImitationProcessor(new ImitationProcessorOptions())
             .RunImitationAsync(new ImitationOptions
             {
-                ImitationTime = TimeSpan.FromSeconds(10),
+                ImitationTime = TimeSpan.FromMinutes(10),
             });
     }
 }
