@@ -22,8 +22,9 @@ internal record FrequencyMapBucket : IComparable<FrequencyMapBucket>
 
         if (ReferenceEquals(this, other)) return true;
 
-        return Math.Abs(Min - other.Min) < 0.0000001 &&
-               Math.Abs(Max - other.Max) < 0.0000001 &&
+        const double tolerance = 0.0000001;
+        return Math.Abs(Min - other.Min) < tolerance &&
+               Math.Abs(Max - other.Max) < tolerance &&
                ItemsAmount == other.ItemsAmount;
     }
 

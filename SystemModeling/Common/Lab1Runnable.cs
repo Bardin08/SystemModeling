@@ -21,14 +21,9 @@ public class Lab1Runnable : IRunnable
             .WithUniformDistribution(opt =>
             {
                 opt.Amount = 10000;
-                opt.A = 5;
-                opt.C = 7;
+                opt.A = 7 ^ 11;
+                opt.C = 5 ^ 13;
             })
-            // .WithExponentialDistribution(opt =>
-            // {
-            //     opt.Lambda = .05;
-            //     opt.Amount = 10000;
-            // })
             .Analyze()
             .AddCollectors(ab =>
             {
