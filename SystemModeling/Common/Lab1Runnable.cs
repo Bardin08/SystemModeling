@@ -1,6 +1,7 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab1.Analytics.Collectors.Options;
 using SystemModeling.Lab1.Fluent;
+using SystemModeling.Lab1.Visualization.Options;
 
 namespace SystemModeling.Common;
 
@@ -36,14 +37,14 @@ public class Lab1Runnable : IRunnable
             {
                 vb.AddStatisticsVisualization();
                 vb.AddFrequencyMapVisualization();
-                // vb.AddHistogramVisualization(opt =>
-                // {
-                //     opt.Buckets = 15;
-                //     opt.MinValue = 0;
-                //     opt.MaxValue = 5;
-                //     opt.MaxCharsPerLine = 15;
-                //     opt.Mode = VisualizationMode.Horizontal;
-                // });
+                vb.AddHistogramVisualization(opt =>
+                {
+                    opt.Buckets = 15;
+                    opt.MinValue = 0;
+                    opt.MaxValue = 5;
+                    opt.MaxCharsPerLine = 15;
+                    opt.Mode = VisualizationMode.Horizontal;
+                });
             })
             .Build();
 
