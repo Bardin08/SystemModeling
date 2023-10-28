@@ -1,18 +1,20 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
+using SystemModeling.Lab2.Routing.Policies;
 
-namespace SystemModeling.Lab2;
+namespace SystemModeling.Lab2.Routing;
 
 public class EventRouter<TEvent>
 {
-    private readonly ConcurrentQueue<TEvent> _eventStore;
     private readonly ConcurrentDictionary<string, ChannelWriter<TEvent>> _handlers;
+
+    private readonly IRoutingPolicy _routingPolicy;
 
     public EventRouter(ConcurrentQueue<TEvent> eventStore)
     {
-        _eventStore = eventStore;
-
         _handlers = new ConcurrentDictionary<string, ChannelWriter<TEvent>>();
+
+        _routingPolicy = new EquallyDistributionRoutingPolicy<TEvent>(eventStore, _handlers);
     }
 
     public bool AddRoute(string routeId, ChannelWriter<TEvent> channelWriter)
@@ -33,22 +35,6 @@ public class EventRouter<TEvent>
 
     public async Task RouteAsync(CancellationToken ct)
     {
-        while (!ct.IsCancellationRequested)
-        {
-            if (_eventStore.IsEmpty)
-            {
-                continue;
-            }
-
-            foreach (var cw in _handlers.Values)
-            {
-                if (!_eventStore.TryDequeue(out var @event))
-                {
-                    continue;
-                }
-
-                await cw.WriteAsync(@event, CancellationToken.None);
-            }
-        }
+        await _routingPolicy.RouteAsync(null, ct);
     }
 }
