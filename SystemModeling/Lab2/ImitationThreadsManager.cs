@@ -4,7 +4,7 @@ using System.Threading.Channels;
 using Newtonsoft.Json;
 using SystemModeling.Lab2.Configuration;
 using SystemModeling.Lab2.Models;
-using SystemModeling.Lab2.Routing;
+using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
 
@@ -12,20 +12,20 @@ namespace SystemModeling.Lab2;
 
 internal class ImitationThreadsManager<TEvent>
 {
-    private readonly EventRouter<TEvent> _router;
+    private readonly IEventsRoutingService<TEvent> _router;
     private readonly CancellationToken _cancellationToken;
     private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
     private readonly List<Task> _threads;
 
     public ImitationThreadsManager(
-        RouteMappingService routeMappingService,
+        IRoutingMapService routingMapService,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken cancellationToken)
     {
         _eventStore = eventStore;
         _cancellationToken = cancellationToken;
 
-        _router = new EventRouter<TEvent>(eventStore, routeMappingService);
+        _router = new EventsRoutingService<TEvent>(eventStore, routingMapService);
         _threads = new List<Task>();
     }
 

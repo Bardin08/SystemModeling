@@ -22,7 +22,7 @@ internal sealed class ImitationProcessor
         _processorNodes = new List<ProcessorNode>();
 
         _threadsManager = new ImitationThreadsManager<string>(
-            new RouteMappingService(_processorNodes), _eventsStore, _cancellationTokenSource.Token);
+            new RoutingMapService(_processorNodes), _eventsStore, _cancellationTokenSource.Token);
     }
 
     public async Task RunImitationAsync(ImitationOptions options)

@@ -1,12 +1,13 @@
-﻿using SystemModeling.Lab2.Routing.Models;
+﻿using SystemModeling.Lab2.Routing.Interfaces;
+using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Routing.Services;
 
-internal class RouteMappingService
+internal class RoutingMapService : IRoutingMapService
 {
     private readonly List<ProcessorNode> _processors;
 
-    public RouteMappingService(List<ProcessorNode> processors)
+    public RoutingMapService(List<ProcessorNode> processors)
     {
         _processors = processors;
     }

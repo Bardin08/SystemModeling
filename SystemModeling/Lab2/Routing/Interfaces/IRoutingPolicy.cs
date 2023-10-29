@@ -1,4 +1,4 @@
-﻿namespace SystemModeling.Lab2.Routing.Policies;
+﻿namespace SystemModeling.Lab2.Routing.Interfaces;
 
 internal interface IRoutingPolicy
 {
