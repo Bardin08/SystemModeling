@@ -7,8 +7,8 @@ namespace SystemModeling.Lab2.ImitationCore.Interfaces;
 
 internal interface IImitationThreadFactory<TEvent>
 {
-    Task GetProcessingTask(
-        ImitationThreadOptions options,
+    (Guid ThreadId, Task Task) GetProcessingTask(
+        object options,
         ChannelReader<EventContext<TEvent>> eventsQueue,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken ct);

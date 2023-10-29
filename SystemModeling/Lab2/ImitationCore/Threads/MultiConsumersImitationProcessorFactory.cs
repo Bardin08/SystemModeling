@@ -11,23 +11,37 @@ namespace SystemModeling.Lab2.ImitationCore.Threads;
 internal class MultiConsumersImitationProcessorFactory<TEvent>
     : IImitationThreadFactory<TEvent>
 {
-    public Task GetProcessingTask(
-        ImitationThreadOptions options,
+    public (Guid ThreadId, Task Task) GetProcessingTask(
+        object options,
         ChannelReader<EventContext<TEvent>> eventsQueue,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken ct)
     {
-        return Task.Run(async () =>
+        var processorOptions = (options as MultiConsumersImitationProcessorOptions)!;
+        if (processorOptions.ConsumersAmount < 0 ||
+            processorOptions.ProcessorOptions.Count != processorOptions.ConsumersAmount)
         {
-            var task1 = GetProcessingTaskInternal(options, eventsQueue, eventStore, ct);
-            var task2 = GetProcessingTaskInternal(options, eventsQueue, eventStore, ct);
+            return (Guid.Empty, Task.CompletedTask);
+        }
 
-            await Task.WhenAll(task1, task2);
+        var threadId = Guid.NewGuid();
+        var task = Task.Run(async () =>
+        {
+            var tasks = new List<Task>();
+            foreach (var procOptions in processorOptions.ProcessorOptions)
+            {
+                procOptions.ThreadId = threadId;
+                tasks.Add(GetProcessingTaskInternal(
+                    procOptions, eventsQueue, eventStore, ct));
+            }
+
+            await Task.WhenAll(tasks);
         }, ct);
+        return (threadId, task);
     }
 
     private Task GetProcessingTaskInternal(
-        ImitationThreadOptions options,
+        ImitationProcessorOptions options,
         ChannelReader<EventContext<TEvent>> eventsQueue,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken ct)

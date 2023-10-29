@@ -3,7 +3,6 @@ using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Threads;
 using SystemModeling.Lab2.Models;
-using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -40,10 +39,10 @@ internal class ImitationThreadsManager<TEvent>
         await Task.WhenAll(_tasksToRun);
     }
 
-    public Guid AddImitationProcessor(TimeSpan processingTime)
+    public Guid AddImitationProcessor(object options)
     {
         var imitationThreadResult = CreateImitationThread(
-            processingTime, _cancellationToken);
+            options, _cancellationToken);
 
         _router.AddRoute(imitationThreadResult.ThreadId.ToString(),
             imitationThreadResult.ChannelWriter);
@@ -54,25 +53,18 @@ internal class ImitationThreadsManager<TEvent>
     }
 
     private CreateImitationThreadResult<TEvent> CreateImitationThread(
-        TimeSpan processingTime, CancellationToken ct)
+        object options, CancellationToken ct)
     {
         var channel = Channel.CreateUnbounded<EventContext<TEvent>>();
 
-        var threadId = Guid.NewGuid();
-        var options = new ImitationThreadOptions
-        {
-            ThreadId = threadId,
-            ProcessingTime = processingTime
-        };
-
-        var thread = _imitationThreadFactory.GetProcessingTask(
+        var (threadId, task) = _imitationThreadFactory.GetProcessingTask(
             options, channel.Reader, _eventStore, ct);
 
         return new CreateImitationThreadResult<TEvent>
         {
             ThreadId = threadId,
             ChannelWriter = channel.Writer,
-            ThreadExecutable = thread
+            ThreadExecutable = task
         };
     }
 }

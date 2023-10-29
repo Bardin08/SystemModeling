@@ -10,13 +10,18 @@ namespace SystemModeling.Lab2.ImitationCore.Threads;
 
 internal class ImitationProcessorFactory<TEvent> : IImitationThreadFactory<TEvent>
 {
-    public Task GetProcessingTask(
-        ImitationThreadOptions options,
+    public (Guid ThreadId, Task Task) GetProcessingTask(
+        object options,
         ChannelReader<EventContext<TEvent>> eventsQueue,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken ct)
     {
-        return Task.Run(async () =>
+        var threadId = Guid.NewGuid();
+        
+        var threadOptions = (options as ImitationProcessorOptions)!;
+        threadOptions.ThreadId = threadId;
+
+        var task = Task.Run(async () =>
         {
             var sb = new StringBuilder();
             while (!ct.IsCancellationRequested)
@@ -25,7 +30,7 @@ internal class ImitationProcessorFactory<TEvent> : IImitationThreadFactory<TEven
 
                 if (eventsQueue.TryRead(out var @event))
                 {
-                    sb.Append($"{options.ThreadId}: Event: {JsonConvert.SerializeObject(@event)}");
+                    sb.Append($"{threadOptions.ThreadId}: Event: {JsonConvert.SerializeObject(@event)}");
                     eventStore.Enqueue(@event);
                 }
 
@@ -34,8 +39,10 @@ internal class ImitationProcessorFactory<TEvent> : IImitationThreadFactory<TEven
                     Console.WriteLine(sb.ToString());
                 }
 
-                await Task.Delay(options.ProcessingTime, CancellationToken.None);
+                await Task.Delay(threadOptions.ProcessingTime, CancellationToken.None);
             }
         }, ct);
+
+        return (threadId, task);
     }
 }
