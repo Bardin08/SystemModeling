@@ -1,20 +1,21 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
 using SystemModeling.Lab2.Routing.Models;
+using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2.Routing.Policies;
 
 internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEvent>>
 {
-    private readonly RouteMap _routeMap;
+    private readonly RouteMappingService _routeMappingService;
 
     public RouteRoutingPolicy(
-        RouteMap routeMap,
+        RouteMappingService routeMappingService,
         ConcurrentQueue<EventContext<TEvent>> eventsStore,
         ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> handlers)
         : base(eventsStore, handlers)
     {
-        _routeMap = routeMap;
+        _routeMappingService = routeMappingService;
     }
 
     public override async Task RouteAsync(object? parameters, CancellationToken ct)
@@ -29,7 +30,7 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEven
 
             if (EventsStore.TryDequeue(out var eventCtx))
             {
-                var processorNode = _routeMap.GetProcessorNodeByName(eventCtx.NextProcessorName);
+                var processorNode = _routeMappingService.GetProcessorNodeByName(eventCtx.NextProcessorName);
 
                 if (processorNode.Name is "complete")
                 {

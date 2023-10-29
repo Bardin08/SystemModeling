@@ -2,6 +2,7 @@
 using System.Threading.Channels;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Policies;
+using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2.Routing;
 
@@ -13,12 +14,12 @@ internal class EventRouter<TEvent>
 
     public EventRouter(
         ConcurrentQueue<EventContext<TEvent>> eventStore,
-        RouteMap routeMap)
+        RouteMappingService routeMappingService)
     {
         _handlers = new ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>>();
 
         _routingPolicy = new RouteRoutingPolicy<TEvent>(
-            routeMap, eventStore, _handlers);
+            routeMappingService, eventStore, _handlers);
     }
 
     public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)

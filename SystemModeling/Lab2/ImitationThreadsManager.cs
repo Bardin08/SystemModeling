@@ -6,6 +6,7 @@ using SystemModeling.Lab2.Configuration;
 using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Models;
+using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2;
 
@@ -17,14 +18,14 @@ internal class ImitationThreadsManager<TEvent>
     private readonly List<Task> _threads;
 
     public ImitationThreadsManager(
-        RouteMap routeMap,
+        RouteMappingService routeMappingService,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken cancellationToken)
     {
         _eventStore = eventStore;
         _cancellationToken = cancellationToken;
 
-        _router = new EventRouter<TEvent>(eventStore, routeMap);
+        _router = new EventRouter<TEvent>(eventStore, routeMappingService);
         _threads = new List<Task>();
     }
 

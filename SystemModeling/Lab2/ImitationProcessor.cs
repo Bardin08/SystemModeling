@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using SystemModeling.Lab2.Configuration;
 using SystemModeling.Lab2.Routing.Models;
+using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2;
 
@@ -21,7 +22,7 @@ internal sealed class ImitationProcessor
         _processorNodes = new List<ProcessorNode>();
 
         _threadsManager = new ImitationThreadsManager<string>(
-            new RouteMap(_processorNodes), _eventsStore, _cancellationTokenSource.Token);
+            new RouteMappingService(_processorNodes), _eventsStore, _cancellationTokenSource.Token);
     }
 
     public async Task RunImitationAsync(ImitationOptions options)
@@ -42,7 +43,6 @@ internal sealed class ImitationProcessor
                 new()
                 {
                     Name = "processor_1__processor_2",
-                    TargetProcessorRouteId = threadId2.ToString(),
                     TransitionChance = 1,
                     ProcessorName = "processor_2"
                 }
@@ -58,7 +58,6 @@ internal sealed class ImitationProcessor
                 new()
                 {
                     Name = "processor_2__processor_3",
-                    TargetProcessorRouteId = threadId3.ToString(),
                     TransitionChance = 1,
                     ProcessorName = "processor_3"
                 }
@@ -74,7 +73,6 @@ internal sealed class ImitationProcessor
                 new()
                 {
                     Name = "processor_3__complete",
-                    TargetProcessorRouteId = string.Empty,
                     TransitionChance = 1,
                     ProcessorName = "complete"
                 }
