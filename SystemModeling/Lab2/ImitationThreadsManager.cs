@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
+using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Threads;
 using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Options;
@@ -25,7 +26,7 @@ internal class ImitationThreadsManager<TEvent>
         _eventStore = eventStore;
         _cancellationToken = cancellationToken;
 
-        _imitationThreadFactory = new ImitationProcessorFactory<TEvent>();
+        _imitationThreadFactory = new MultiConsumersImitationProcessorFactory<TEvent>();
         _router = new EventsRoutingService<TEvent>(eventStore, routingMapService);
         _tasksToRun = new List<Task>();
     }

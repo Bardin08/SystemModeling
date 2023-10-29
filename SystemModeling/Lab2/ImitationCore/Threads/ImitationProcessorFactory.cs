@@ -2,20 +2,11 @@
 using System.Text;
 using System.Threading.Channels;
 using Newtonsoft.Json;
-using SystemModeling.Lab2.Models;
+using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Threads;
-
-internal interface IImitationThreadFactory<TEvent>
-{
-    Task GetProcessingTask(
-        ImitationThreadOptions options,
-        ChannelReader<EventContext<TEvent>> eventsQueue,
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
-        CancellationToken ct);
-}
 
 internal class ImitationProcessorFactory<TEvent> : IImitationThreadFactory<TEvent>
 {

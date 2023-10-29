@@ -85,7 +85,7 @@ internal sealed class SimulationProcessor
 
     private void FillWithQueueWithEvents(ConcurrentQueue<EventContext<string>> eventStore)
     {
-        foreach (var i in Enumerable.Range(0, 1))
+        foreach (var i in Enumerable.Range(0, 100))
         {
             eventStore.Enqueue(
                 new EventContext<string>
