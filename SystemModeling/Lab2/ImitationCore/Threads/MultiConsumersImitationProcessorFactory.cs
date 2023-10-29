@@ -55,13 +55,15 @@ internal class MultiConsumersImitationProcessorFactory<TEvent>
 
                 if (eventsQueue.TryRead(out var @event))
                 {
-                    sb.Append($"{options.ThreadId}: Event: {JsonConvert.SerializeObject(@event)}");
+                    sb.Append($"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
                     eventStore.Enqueue(@event);
                 }
 
                 if (sb.Length > 0)
                 {
+                    Console.ForegroundColor = options.Color;
                     Console.WriteLine(sb.ToString());
+                    Console.ResetColor();
                 }
 
                 await Task.Delay(options.ProcessingTime, CancellationToken.None);

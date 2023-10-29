@@ -24,23 +24,33 @@ public class Lab2Runnable : IRunnable
                     {
                         new()
                         {
-                            ProcessingTime = TimeSpan.FromSeconds(1),
+                            ProcessingTime = TimeSpan.Zero,
+                            Alias = "__1",
+                            Color = ConsoleColor.Gray
                         },
                         new()
                         {
-                            ProcessingTime = TimeSpan.FromSeconds(1.1),
+                            ProcessingTime = TimeSpan.Zero,
+                            Alias = "__2",
+                            Color = ConsoleColor.Cyan
                         },
                         new()
                         {
-                            ProcessingTime = TimeSpan.FromSeconds(1.2),
+                            ProcessingTime = TimeSpan.Zero,
+                            Alias = "__3",
+                            Color = ConsoleColor.Green
                         },
                         new()
                         {
-                            ProcessingTime = TimeSpan.FromSeconds(1.3),
+                            ProcessingTime = TimeSpan.Zero,
+                            Alias = "__4",
+                            Color = ConsoleColor.Yellow
                         },
                         new()
                         {
-                            ProcessingTime = TimeSpan.FromSeconds(1.4),
+                            ProcessingTime = TimeSpan.Zero,
+                            Alias = "__5",
+                            Color = ConsoleColor.Blue
                         },
                     }
                 }
