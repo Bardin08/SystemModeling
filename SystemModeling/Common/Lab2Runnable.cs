@@ -1,6 +1,6 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2;
-using SystemModeling.Lab2.Configuration;
+using SystemModeling.Lab2.Options;
 
 namespace SystemModeling.Common;
 

@@ -1,4 +1,4 @@
-﻿namespace SystemModeling.Lab2.Configuration;
+﻿namespace SystemModeling.Lab2.Options;
 
 internal record ImitationOptions
 {
