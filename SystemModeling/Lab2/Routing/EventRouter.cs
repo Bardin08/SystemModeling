@@ -1,23 +1,27 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
+using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Policies;
 
 namespace SystemModeling.Lab2.Routing;
 
-public class EventRouter<TEvent>
+internal class EventRouter<TEvent>
 {
-    private readonly ConcurrentDictionary<string, ChannelWriter<TEvent>> _handlers;
+    private readonly ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> _handlers;
 
     private readonly IRoutingPolicy _routingPolicy;
 
-    public EventRouter(ConcurrentQueue<TEvent> eventStore)
+    public EventRouter(
+        ConcurrentQueue<EventContext<TEvent>> eventStore,
+        RouteMap routeMap)
     {
-        _handlers = new ConcurrentDictionary<string, ChannelWriter<TEvent>>();
+        _handlers = new ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>>();
 
-        _routingPolicy = new EquallyDistributionRoutingPolicy<TEvent>(eventStore, _handlers);
+        _routingPolicy = new RouteRoutingPolicy<TEvent>(
+            routeMap, eventStore, _handlers);
     }
 
-    public bool AddRoute(string routeId, ChannelWriter<TEvent> channelWriter)
+    public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)
     {
         return _handlers.TryAdd(routeId, channelWriter);
     }

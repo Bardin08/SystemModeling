@@ -1,51 +1,59 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using System.Threading.Channels;
+using Newtonsoft.Json;
 using SystemModeling.Lab2.Configuration;
 using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Routing;
+using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2;
 
-internal class ImitationThreadsManager
+internal class ImitationThreadsManager<TEvent>
 {
-    private readonly EventRouter<string> _router;
+    private readonly EventRouter<TEvent> _router;
     private readonly CancellationToken _cancellationToken;
+    private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
     private readonly List<Task> _threads;
 
     public ImitationThreadsManager(
-        ConcurrentQueue<string> eventStore,
+        RouteMap routeMap,
+        ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken cancellationToken)
     {
+        _eventStore = eventStore;
         _cancellationToken = cancellationToken;
 
-        _router = new EventRouter<string>(eventStore);
+        _router = new EventRouter<TEvent>(eventStore, routeMap);
         _threads = new List<Task>();
     }
 
     public async Task RunAllAsync()
     {
-        var routeMessagesTask = _router.RouteAsync(_cancellationToken);
+        var routeMessagesTask = Task
+            .Run(() => _router.RouteAsync(_cancellationToken), _cancellationToken);
 
         _threads.AddRange(new[] { routeMessagesTask });
         await Task.WhenAll(_threads);
     }
 
-    public void AddImitationThread(TimeSpan processingTime)
+    public Guid AddImitationThread(TimeSpan processingTime)
     {
-        var imitationThreadResult = CreateImitationThread<string>(
+        var imitationThreadResult = CreateImitationThread(
             processingTime, _cancellationToken);
 
         _router.AddRoute(imitationThreadResult.ThreadId.ToString(),
             imitationThreadResult.ChannelWriter);
 
         _threads.Add(imitationThreadResult.ThreadExecutable);
+
+        return imitationThreadResult.ThreadId;
     }
 
-    private CreateImitationThreadResult<TEvent> CreateImitationThread<TEvent>(
+    private CreateImitationThreadResult<TEvent> CreateImitationThread(
         TimeSpan processingTime, CancellationToken ct)
     {
-        var channel = Channel.CreateUnbounded<TEvent>();
+        var channel = Channel.CreateUnbounded<EventContext<TEvent>>();
 
         var threadId = Guid.NewGuid();
         var options = new ImitationThreadOptions()
@@ -54,7 +62,7 @@ internal class ImitationThreadsManager
             ProcessingTime = processingTime
         };
 
-        var thread = GetImitationThreadInternalAsync(channel.Reader, options, ct);
+        var thread = GetImitationThreadInternalAsync(channel.Reader, options, _eventStore, ct);
 
         return new CreateImitationThreadResult<TEvent>()
         {
@@ -64,36 +72,28 @@ internal class ImitationThreadsManager
         };
     }
 
-    private async Task GetImitationThreadInternalAsync<TEvent>(
-        ChannelReader<TEvent> eventsQueue,
+    private async Task GetImitationThreadInternalAsync(
+        ChannelReader<EventContext<TEvent>> eventsQueue,
         ImitationThreadOptions options,
+        ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken ct)
     {
         var sb = new StringBuilder();
         while (!ct.IsCancellationRequested)
         {
             sb.Clear();
-            sb.Append($"[{DateTime.Now:hh:mm:ss}] {options.ThreadId.ToString()[..6]}: Iteration started...")
-                .AppendLine();
-
-            if (eventsQueue.Count is 0)
-            {
-                sb.Append("\tEvents queue is empty").AppendLine();
-                sb.Append($"[{DateTime.Now:hh:mm:ss}] {options.ThreadId.ToString()[..6]}: Iteration ended...")
-                    .AppendLine();
-                Console.WriteLine(sb.ToString());
-                await Task.Delay(options.ProcessingTime, CancellationToken.None);
-                continue;
-            }
 
             if (eventsQueue.TryRead(out var @event))
             {
-                sb.Append("\tEvent received.").AppendLine();
-                sb.Append($"\tEvent: {@event}").AppendLine();
+                sb.Append($"{options.ThreadId}: Event: {JsonConvert.SerializeObject(@event)}");
+                eventStore.Enqueue(@event);
             }
 
-            sb.Append($"[{DateTime.Now:hh:mm:ss}] {options.ThreadId.ToString()[..6]}: Iteration ended...");
-            Console.WriteLine(sb.ToString());
+            if (sb.Length > 0)
+            {
+                Console.WriteLine(sb.ToString());
+            }
+
             await Task.Delay(options.ProcessingTime, CancellationToken.None);
         }
     }
