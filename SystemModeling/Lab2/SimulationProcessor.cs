@@ -5,7 +5,7 @@ using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2;
 
-internal sealed class ImitationProcessor
+internal sealed class SimulationProcessor
 {
     private readonly ImitationProcessorOptions _options;
     private readonly ConcurrentQueue<EventContext<string>> _eventsStore;
@@ -13,7 +13,7 @@ internal sealed class ImitationProcessor
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly List<ProcessorNode> _processorNodes;
 
-    public ImitationProcessor(ImitationProcessorOptions options)
+    public SimulationProcessor(ImitationProcessorOptions options)
     {
         _options = options;
 
@@ -30,9 +30,9 @@ internal sealed class ImitationProcessor
         _cancellationTokenSource.CancelAfter(options.ImitationTime);
         FillWithQueueWithEvents(_eventsStore);
 
-        var threadId1 = _threadsManager.AddImitationThread(TimeSpan.FromSeconds(5));
-        var threadId2 = _threadsManager.AddImitationThread(TimeSpan.FromSeconds(5));
-        var threadId3 = _threadsManager.AddImitationThread(TimeSpan.FromSeconds(5));
+        var threadId1 = _threadsManager.AddImitationProcessor(TimeSpan.FromSeconds(5));
+        var threadId2 = _threadsManager.AddImitationProcessor(TimeSpan.FromSeconds(5));
+        var threadId3 = _threadsManager.AddImitationProcessor(TimeSpan.FromSeconds(5));
 
         _processorNodes.Add(new ProcessorNode
         {

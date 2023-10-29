@@ -15,7 +15,7 @@ public class Lab2Runnable : IRunnable
 
     private async Task RunInternalAsync()
     {
-        await new ImitationProcessor(new ImitationProcessorOptions())
+        await new SimulationProcessor(new ImitationProcessorOptions())
             .RunImitationAsync(new ImitationOptions
             {
                 ImitationTime = TimeSpan.FromMinutes(10),
