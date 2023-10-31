@@ -12,6 +12,11 @@ public class Lab2Runnable : IRunnable
             .CreateBuilder()
             .Simulate()
             .ForSeconds(300)
+            .WithEventGenerator(b =>
+            {
+                b.EventsAmount = 5;
+                b.AddDelay = TimeSpan.FromSeconds(0.5);
+            })
             .AndRoutingMap(builder =>
             {
                 builder.AddProcessor("processor_1", pb => { pb.AddTransition("processor_2", 1); })
@@ -42,7 +47,7 @@ public class Lab2Runnable : IRunnable
                     .UseMultipleConsumers(opt =>
                     {
                         opt.ConsumersAmount = 1;
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()
                             {
@@ -57,7 +62,7 @@ public class Lab2Runnable : IRunnable
                     .UseMultipleConsumers(opt =>
                     {
                         opt.ConsumersAmount = 1;
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()
                             {

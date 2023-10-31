@@ -32,6 +32,14 @@ internal class SimulationProcessorBuilder :
         return this;
     }
 
+    public SimulationProcessorBuilder WithEventGenerator(Action<EventProviderOptions> builder)
+    {
+        var eventsProviderOptions = new EventProviderOptions();
+        builder(eventsProviderOptions);
+        _simulationOptions.EventProviderOptions = eventsProviderOptions;
+        return this;
+    }
+
     public SimulationProcessorBuilder AndRoutingMap(Action<IRoutingMapBuilder> builder)
     {
         _routingMapBuilder = RoutingMapBuilder
@@ -43,12 +51,6 @@ internal class SimulationProcessorBuilder :
 
     public SimulationProcessor Build()
     {
-        _simulationOptions.EventProviderOptions = new EventProviderOptions
-        {
-            AddDelay = TimeSpan.FromSeconds(5),
-            EventsAmount = 10
-        };
-
         var simulationProcessor = new SimulationProcessor(_simulationOptions);
         return simulationProcessor;
     }
