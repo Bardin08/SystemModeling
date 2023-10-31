@@ -8,7 +8,7 @@ public class Lab2Runnable : IRunnable
 {
     public Task RunAsync(Dictionary<string, object> args)
     {
-        SimulationProcessorBuilder
+        var simulationProcessor = SimulationProcessorBuilder
             .CreateBuilder()
             .Simulate()
             .ForSeconds(300)
@@ -18,44 +18,58 @@ public class Lab2Runnable : IRunnable
                     .UseMultipleConsumers(opt =>
                     {
                         opt.ConsumersAmount = 2;
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()
                             {
                                 Alias = "__1_1",
                                 Color = ConsoleColor.Blue,
-                                ProcessingTime = TimeSpan.FromSeconds(1)
+                                ProcessingTime = TimeSpan.FromSeconds(0.1)
                             },
                             new()
                             {
                                 Alias = "__1_2",
-                                Color = ConsoleColor.Yellow,
-                                ProcessingTime = TimeSpan.FromSeconds(1)
+                                Color = ConsoleColor.Blue,
+                                ProcessingTime = TimeSpan.FromSeconds(0.1)
                             }
                         };
                     });
 
                 builder.AddProcessor("processor_2", pb =>
                     {
-                        pb.AddTransition("processor2", 0.1);
-                        pb.AddTransition("processor_3", 0.9);
+                        pb.AddTransition("processor_3", 1);
                     })
-                    .UseSingleConsumer(opt =>
+                    .UseMultipleConsumers(opt =>
                     {
-                        opt.Alias = "__2_1";
-                        opt.ProcessingTime = TimeSpan.FromSeconds(1);
-                        opt.Color = ConsoleColor.Green;
+                        opt.ConsumersAmount = 1;
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
+                        {
+                            new()
+                            {
+                                Alias = "__2_1",
+                                ProcessingTime = TimeSpan.FromSeconds(0.05),
+                                Color = ConsoleColor.Yellow
+                            }
+                        };
                     });
 
                 builder.AddProcessor("processor_3", bp => { bp.AddTransition("complete", 1); })
-                    .UseSingleConsumer(opt =>
+                    .UseMultipleConsumers(opt =>
                     {
-                        opt.Alias = "__3_1";
-                        opt.Color = ConsoleColor.Red;
-                        opt.ProcessingTime = TimeSpan.FromSeconds(1);
+                        opt.ConsumersAmount = 1;
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
+                        {
+                            new()
+                            {
+                                Alias = "__3_1",
+                                ProcessingTime = TimeSpan.FromSeconds(0.1),
+                                Color = ConsoleColor.Green
+                            }
+                        };
                     });
             })
             .Build();
-        return Task.CompletedTask;
+
+        return simulationProcessor.RunImitationAsync();
     }
 }
