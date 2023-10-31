@@ -2,5 +2,5 @@
 
 internal interface ISimulationOptionsBuilder
 {
-    IRoutingMapBuilderStage ForSeconds(int seconds);
+    IEventGeneratorConfigurationStage ForSeconds(int seconds);
 }

@@ -6,6 +6,7 @@ namespace SystemModeling.Lab2.Fluent;
 internal class SimulationProcessorBuilder :
     ISimulationProcessorBuilder,
     ISimulationOptionsBuilder,
+    IEventGeneratorConfigurationStage,
     IRoutingMapBuilderStage
 {
     private readonly SimulationOptions _simulationOptions;
@@ -26,13 +27,13 @@ internal class SimulationProcessorBuilder :
         return this;
     }
 
-    public IRoutingMapBuilderStage ForSeconds(int seconds)
+    public IEventGeneratorConfigurationStage ForSeconds(int seconds)
     {
         _simulationOptions.SimulationTimeSeconds = TimeSpan.FromSeconds(seconds);
         return this;
     }
 
-    public SimulationProcessorBuilder WithEventGenerator(Action<EventProviderOptions> builder)
+    public IRoutingMapBuilderStage WithEventGenerator(Action<EventProviderOptions> builder)
     {
         var eventsProviderOptions = new EventProviderOptions();
         builder(eventsProviderOptions);
