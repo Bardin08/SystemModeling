@@ -29,7 +29,7 @@ internal class AnalyticsProcessorBuilder
 
     public AnalyticsProcessor BuildProcessor()
     {
-        var first = _steps.First(); 
+        var first = _steps.First();
         _steps.Aggregate((a, b) => a.SetNext(b)!);
         return new AnalyticsProcessor(first);
     }

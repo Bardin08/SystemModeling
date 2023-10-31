@@ -41,7 +41,7 @@ internal class ImitationThreadsManager<TEvent>
             _eventStore, _cancellationToken);
         var routeMessagesTask = _router.RouteAsync(_cancellationToken);
 
-        _tasksToRun.AddRange(new[] {eventsProvider, routeMessagesTask});
+        _tasksToRun.AddRange(new[] { eventsProvider, routeMessagesTask });
         return Task.WhenAll(_tasksToRun);
     }
 

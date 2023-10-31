@@ -12,7 +12,7 @@ internal class Processor
     private readonly VisualizationProcessor _visualizationProcessor;
 
     private double[]? _data;
-    
+
     public Processor(IGenerator generator,
         IAnalyticsProcessor analyticsProcessor,
         VisualizationProcessor visualizationProcessor)

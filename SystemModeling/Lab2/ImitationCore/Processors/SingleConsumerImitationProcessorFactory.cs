@@ -17,7 +17,7 @@ internal class SingleConsumerImitationProcessorFactory<TEvent> : IImitationProce
         CancellationToken ct)
     {
         var threadId = Guid.NewGuid();
-        
+
         var threadOptions = (options as ImitationProcessorOptions)!;
         threadOptions.ThreadId = threadId;
 

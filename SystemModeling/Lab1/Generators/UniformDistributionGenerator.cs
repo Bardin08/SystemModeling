@@ -11,7 +11,7 @@ internal class UniformDistributionGenerator : IGenerator
         A = 5 ^ 13,
         C = 2 ^ 31
     };
-    
+
     private readonly UniformDistributionOptions _options;
 
     public UniformDistributionGenerator(UniformDistributionOptions? options = null)
@@ -23,7 +23,7 @@ internal class UniformDistributionGenerator : IGenerator
     {
         var nums = new double[_options.Amount];
         var z = Random.Shared.NextDouble();
-        
+
         for (var i = 0; i < _options.Amount; i++)
         {
             z = _options.A * z % _options.C;

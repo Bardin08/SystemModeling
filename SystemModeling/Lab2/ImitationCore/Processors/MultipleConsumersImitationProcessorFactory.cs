@@ -58,7 +58,8 @@ internal class MultipleConsumersImitationProcessorFactory<TEvent>
 
                     if (eventsQueue.TryRead(out var @event))
                     {
-                        sb.Append($"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
+                        sb.Append(
+                            $"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
                         eventStore.Enqueue(@event);
                     }
 

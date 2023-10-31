@@ -35,9 +35,9 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEven
 
             var processorNode = _routingMapService.GetProcessorNodeByName(eventCtx.NextProcessorName);
 
+            // no need to route it. Processing complete
             if (processorNode?.Name is "complete")
             {
-                // no need to route it. Processing complete
                 continue;
             }
 

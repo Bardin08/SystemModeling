@@ -18,9 +18,15 @@ internal record FrequencyMapBucket : IComparable<FrequencyMapBucket>
 
     public virtual bool Equals(FrequencyMapBucket? other)
     {
-        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
 
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
 
         const double tolerance = 0.0000001;
         return Math.Abs(Min - other.Min) < tolerance &&

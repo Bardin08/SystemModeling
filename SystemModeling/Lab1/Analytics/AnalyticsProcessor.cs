@@ -5,7 +5,7 @@ namespace SystemModeling.Lab1.Analytics;
 internal class AnalyticsProcessor : IAnalyticsProcessor
 {
     private readonly IAnalyzingStep _analyzingSteps;
-    
+
     public AnalyticsProcessor(IAnalyzingStep analyzingSteps)
     {
         _analyzingSteps = analyzingSteps;

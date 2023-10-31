@@ -6,6 +6,7 @@ internal interface IRoutingMapBuilder
 {
     IRoutingMapBuilder AddProcessor(
         string processorName, Action<IProcessorNodeBuilder> factory);
+
     void UseSingleConsumer(Action<ImitationProcessorOptions> factory);
     void UseMultipleConsumers(Action<MultiConsumersImitationProcessorOptions> factory);
 }

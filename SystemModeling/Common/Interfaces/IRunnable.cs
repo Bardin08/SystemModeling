@@ -4,4 +4,3 @@ internal interface IRunnable
 {
     Task RunAsync(Dictionary<string, object> args);
 }
-

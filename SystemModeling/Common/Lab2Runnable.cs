@@ -40,10 +40,7 @@ public class Lab2Runnable : IRunnable
                         };
                     });
 
-                builder.AddProcessor("processor_2", pb =>
-                    {
-                        pb.AddTransition("processor_3", 1);
-                    })
+                builder.AddProcessor("processor_2", pb => { pb.AddTransition("processor_3", 1); })
                     .UseMultipleConsumers(opt =>
                     {
                         opt.ConsumersAmount = 1;

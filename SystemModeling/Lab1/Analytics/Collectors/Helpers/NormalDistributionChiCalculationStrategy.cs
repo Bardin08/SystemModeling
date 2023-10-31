@@ -18,11 +18,11 @@ internal class NormalDistributionChiCalculationStrategy : ChiCalculationBaseStra
         var chiSquare = 0d;
         foreach (var (midPoint, observedFrequency) in requiredData.filteredFrequencyMap)
         {
-            var firstPart = 1 / (Math.Sqrt(2 * Math.PI * Math.Pow(options.Sigma, 2)));
+            var firstPart = 1 / Math.Sqrt(2 * Math.PI * Math.Pow(options.Sigma, 2));
             var expPart = Math.Exp(-Math.Pow(midPoint - options.A, 2) / (2 * Math.Pow(options.Sigma, 2)));
             var theoreticalFrequency = requiredData.totalElements * firstPart * expPart * requiredData.intervalWidth;
             chiSquare += Math.Pow(observedFrequency - theoreticalFrequency, 2) / theoreticalFrequency;
-        }   
+        }
 
         return new ChiSquareDto
         {

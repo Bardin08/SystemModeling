@@ -18,7 +18,7 @@ internal class VisualizationProcessor
             foreach (var visualizer in visualizers)
             {
                 await visualizer.VisualizeAsync(data);
-                System.Console.WriteLine();                
+                System.Console.WriteLine();
             }
 
             return;

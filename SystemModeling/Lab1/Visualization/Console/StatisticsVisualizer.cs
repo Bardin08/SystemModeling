@@ -1,5 +1,4 @@
-﻿
-using SystemModeling.Lab1.Analytics;
+﻿using SystemModeling.Lab1.Analytics;
 using SystemModeling.Lab1.Visualization.Interfaces;
 
 namespace SystemModeling.Lab1.Visualization.Console;

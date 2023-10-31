@@ -11,5 +11,5 @@ internal record AnalyticsContext
     public double? Mean { get; set; }
     public double? Variance { get; set; }
 
-    public object? GeneratorSettings { get; set; }    
+    public object? GeneratorSettings { get; set; }
 }
