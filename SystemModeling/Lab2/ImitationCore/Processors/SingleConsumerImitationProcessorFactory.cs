@@ -6,9 +6,9 @@ using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 
-namespace SystemModeling.Lab2.ImitationCore.Threads;
+namespace SystemModeling.Lab2.ImitationCore.Processors;
 
-internal class ImitationProcessorFactory<TEvent> : IImitationThreadFactory<TEvent>
+internal class SingleConsumerImitationProcessorFactory<TEvent> : IImitationProcessorFactory<TEvent>
 {
     public (Guid ThreadId, Task Task) GetProcessingTask(
         object options,

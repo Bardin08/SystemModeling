@@ -4,7 +4,7 @@ using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Interfaces;
 
-internal interface IImitationThreadFactory<TEvent>
+internal interface IImitationProcessorFactory<TEvent>
 {
     (Guid ThreadId, Task Task) GetProcessingTask(
         object options,

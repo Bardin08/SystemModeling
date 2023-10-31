@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
-using SystemModeling.Lab2.ImitationCore.Threads;
+using SystemModeling.Lab2.ImitationCore.Processors;
 using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Interfaces;
@@ -16,7 +16,7 @@ internal class ImitationThreadsManager<TEvent>
     private readonly IEventsRoutingService<TEvent> _router;
     private readonly IEventsProvider<TEvent> _eventsProvider;
     private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
-    private readonly IImitationThreadFactory<TEvent> _imitationThreadFactory;
+    private readonly IImitationProcessorFactory<TEvent> _imitationProcessorFactory;
     private readonly CancellationToken _cancellationToken;
 
     public ImitationThreadsManager(
@@ -29,7 +29,7 @@ internal class ImitationThreadsManager<TEvent>
         _cancellationToken = cancellationToken;
         _eventsProvider = eventsProvider;
 
-        _imitationThreadFactory = new MultiConsumersImitationProcessorFactory<TEvent>();
+        _imitationProcessorFactory = new MultipleConsumersImitationProcessorFactory<TEvent>();
         _router = new EventsRoutingService<TEvent>(eventStore, routingMapService);
         _tasksToRun = new List<Task>();
     }
@@ -63,7 +63,7 @@ internal class ImitationThreadsManager<TEvent>
     {
         var channel = Channel.CreateUnbounded<EventContext<TEvent>>();
 
-        var (threadId, task) = _imitationThreadFactory.GetProcessingTask(
+        var (threadId, task) = _imitationProcessorFactory.GetProcessingTask(
             options, channel.Reader, _eventStore, ct);
 
         return new CreateImitationThreadResult<TEvent>

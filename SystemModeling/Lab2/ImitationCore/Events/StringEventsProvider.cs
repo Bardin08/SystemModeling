@@ -3,7 +3,7 @@ using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 
-namespace SystemModeling.Lab2.ImitationCore.Threads;
+namespace SystemModeling.Lab2.ImitationCore.Events;
 
 internal class StringEventsProvider : IEventsProvider<string>
 {
