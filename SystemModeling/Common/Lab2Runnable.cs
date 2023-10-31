@@ -1,63 +1,61 @@
 ﻿using SystemModeling.Common.Interfaces;
-using SystemModeling.Lab2;
+using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.Options;
 
 namespace SystemModeling.Common;
 
 public class Lab2Runnable : IRunnable
 {
-    public async Task RunAsync(Dictionary<string, object> args)
+    public Task RunAsync(Dictionary<string, object> args)
     {
-        Console.WriteLine("Execution context: {0}", args["context"]);
-
-        await RunInternalAsync();
-    }
-
-    private async Task RunInternalAsync()
-    {
-        await new SimulationProcessor(new SimulationOptions
+        SimulationProcessorBuilder
+            .CreateBuilder()
+            .Simulate()
+            .ForSeconds(300)
+            .AndRoutingMap(builder =>
             {
-                ImitationProcessorFactoryOptions = new MultiConsumersImitationProcessorOptions
-                {
-                    ConsumersAmount = 5,
-                    ProcessorOptions = new List<ImitationProcessorOptions>
+                builder.AddProcessor("processor_1", pb => { pb.AddTransition("processor_2", 1); })
+                    .UseMultipleConsumers(opt =>
                     {
-                        new()
+                        opt.ConsumersAmount = 2;
+                        opt.ProcessorOptions = new List<ImitationProcessorOptions>()
                         {
-                            ProcessingTime = TimeSpan.Zero,
-                            Alias = "__1",
-                            Color = ConsoleColor.Gray
-                        },
-                        new()
-                        {
-                            ProcessingTime = TimeSpan.Zero,
-                            Alias = "__2",
-                            Color = ConsoleColor.Cyan
-                        },
-                        new()
-                        {
-                            ProcessingTime = TimeSpan.Zero,
-                            Alias = "__3",
-                            Color = ConsoleColor.Green
-                        },
-                        new()
-                        {
-                            ProcessingTime = TimeSpan.Zero,
-                            Alias = "__4",
-                            Color = ConsoleColor.Yellow
-                        },
-                        new()
-                        {
-                            ProcessingTime = TimeSpan.Zero,
-                            Alias = "__5",
-                            Color = ConsoleColor.Blue
-                        },
-                    }
-                }
+                            new()
+                            {
+                                Alias = "__1_1",
+                                Color = ConsoleColor.Blue,
+                                ProcessingTime = TimeSpan.FromSeconds(1)
+                            },
+                            new()
+                            {
+                                Alias = "__1_2",
+                                Color = ConsoleColor.Yellow,
+                                ProcessingTime = TimeSpan.FromSeconds(1)
+                            }
+                        };
+                    });
+
+                builder.AddProcessor("processor_2", pb =>
+                    {
+                        pb.AddTransition("processor2", 0.1);
+                        pb.AddTransition("processor_3", 0.9);
+                    })
+                    .UseSingleConsumer(opt =>
+                    {
+                        opt.Alias = "__2_1";
+                        opt.ProcessingTime = TimeSpan.FromSeconds(1);
+                        opt.Color = ConsoleColor.Green;
+                    });
+
+                builder.AddProcessor("processor_3", bp => { bp.AddTransition("complete", 1); })
+                    .UseSingleConsumer(opt =>
+                    {
+                        opt.Alias = "__3_1";
+                        opt.Color = ConsoleColor.Red;
+                        opt.ProcessingTime = TimeSpan.FromSeconds(1);
+                    });
             })
-            .RunImitationAsync(new ImitationOptions
-            {
-                ImitationTime = TimeSpan.FromMinutes(10),
-            });
+            .Build();
+        return Task.CompletedTask;
     }
 }
