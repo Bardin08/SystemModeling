@@ -12,10 +12,10 @@ internal class RoutingMapService : IRoutingMapService
         _processors = processors;
     }
 
-    public ProcessorNode GetProcessorNodeByName(string processorName)
+    public ProcessorNode? GetProcessorNodeByName(string processorName)
     {
         var processorNode = _processors
-            .First(p => p.Name.Equals(processorName, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(p => p.Name!.Equals(processorName, StringComparison.OrdinalIgnoreCase));
 
         return processorNode;
     }

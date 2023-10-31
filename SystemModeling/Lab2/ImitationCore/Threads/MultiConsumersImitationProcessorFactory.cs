@@ -49,21 +49,25 @@ internal class MultiConsumersImitationProcessorFactory<TEvent>
         return Task.Run(async () =>
         {
             var sb = new StringBuilder();
+            var lockObj = new object();
             while (!ct.IsCancellationRequested)
             {
-                sb.Clear();
-
-                if (eventsQueue.TryRead(out var @event))
+                lock (lockObj)
                 {
-                    sb.Append($"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
-                    eventStore.Enqueue(@event);
-                }
+                    sb.Clear();
 
-                if (sb.Length > 0)
-                {
-                    Console.ForegroundColor = options.Color;
-                    Console.WriteLine(sb.ToString());
-                    Console.ResetColor();
+                    if (eventsQueue.TryRead(out var @event))
+                    {
+                        sb.Append($"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
+                        eventStore.Enqueue(@event);
+                    }
+
+                    if (sb.Length > 0)
+                    {
+                        Console.ForegroundColor = options.Color;
+                        Console.WriteLine(sb.ToString());
+                        Console.ResetColor();
+                    }
                 }
 
                 await Task.Delay(options.ProcessingTime, CancellationToken.None);

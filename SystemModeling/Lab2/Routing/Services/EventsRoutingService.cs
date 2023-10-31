@@ -27,8 +27,8 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
         return _handlers.TryAdd(routeId, channelWriter);
     }
 
-    public async Task RouteAsync(CancellationToken ct)
+    public Task RouteAsync(CancellationToken ct)
     {
-        await _routingPolicy.RouteAsync(null, ct);
+        return _routingPolicy.RouteAsync(null, ct);
     }
 }

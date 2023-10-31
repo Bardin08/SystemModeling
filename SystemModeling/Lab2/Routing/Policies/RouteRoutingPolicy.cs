@@ -28,35 +28,42 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEven
                 continue;
             }
 
-            if (EventsStore.TryDequeue(out var eventCtx))
+            if (!EventsStore.TryDequeue(out var eventCtx))
             {
-                var processorNode = _routingMapService.GetProcessorNodeByName(eventCtx.NextProcessorName);
+                continue;
+            }
 
-                if (processorNode.Name is "complete")
-                {
-                    // no need to route it. Processing complete
-                    continue;                    
-                }
+            var processorNode = _routingMapService.GetProcessorNodeByName(eventCtx.NextProcessorName);
 
-                if (Handlers.TryGetValue(processorNode.RouteId, out var processor))
-                {
-                    await processor.WriteAsync(eventCtx, ct);
-                }
-                else
-                {
-                    throw new Exception($"Can't get processor for {eventCtx.NextProcessorName}");
-                }
+            if (processorNode?.Name is "complete")
+            {
+                // no need to route it. Processing complete
+                continue;
+            }
 
-                var randomNumber = Random.Shared.NextDouble();
-                var cumulative = 0d;
-                foreach (var transition in processorNode.Transitions)
+            if (processorNode?.RouteId is null)
+            {
+                continue;
+            }
+
+            if (Handlers.TryGetValue(processorNode.RouteId, out var processor))
+            {
+                await processor.WriteAsync(eventCtx, ct);
+            }
+            else
+            {
+                throw new Exception($"Can't get processor for {eventCtx.NextProcessorName}");
+            }
+
+            var randomNumber = Random.Shared.NextDouble();
+            var cumulative = 0d;
+            foreach (var transition in processorNode.Transitions)
+            {
+                cumulative += transition.TransitionChance;
+                if (cumulative >= randomNumber)
                 {
-                    cumulative += transition.TransitionChance;
-                    if (cumulative >= randomNumber)
-                    {
-                        eventCtx.NextProcessorName = transition.ProcessorName;
-                        break;
-                    }
+                    eventCtx.NextProcessorName = transition.ProcessorName;
+                    break;
                 }
             }
         }
