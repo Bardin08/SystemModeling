@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Threads;
 using SystemModeling.Lab2.Models;
+using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -11,31 +12,37 @@ namespace SystemModeling.Lab2;
 
 internal class ImitationThreadsManager<TEvent>
 {
-    private readonly IEventsRoutingService<TEvent> _router;
-    private readonly IImitationThreadFactory<TEvent> _imitationThreadFactory;
-    private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
     private readonly List<Task> _tasksToRun;
+    private readonly IEventsRoutingService<TEvent> _router;
+    private readonly IEventsProvider<TEvent> _eventsProvider;
+    private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
+    private readonly IImitationThreadFactory<TEvent> _imitationThreadFactory;
     private readonly CancellationToken _cancellationToken;
 
     public ImitationThreadsManager(
         IRoutingMapService routingMapService,
+        IEventsProvider<TEvent> eventsProvider,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
         CancellationToken cancellationToken)
     {
         _eventStore = eventStore;
         _cancellationToken = cancellationToken;
+        _eventsProvider = eventsProvider;
 
         _imitationThreadFactory = new MultiConsumersImitationProcessorFactory<TEvent>();
         _router = new EventsRoutingService<TEvent>(eventStore, routingMapService);
         _tasksToRun = new List<Task>();
     }
 
-    public async Task RunAllAsync()
+    public Task RunAllAsync()
     {
+        // order matters! Provider -> Router
+        var eventsProvider = _eventsProvider.FillWithQueueWithEvents(
+            _eventStore, _cancellationToken);
         var routeMessagesTask = _router.RouteAsync(_cancellationToken);
 
-        _tasksToRun.Add(routeMessagesTask);
-        await Task.WhenAll(_tasksToRun);
+        _tasksToRun.AddRange(new[] {eventsProvider, routeMessagesTask});
+        return Task.WhenAll(_tasksToRun);
     }
 
     public Guid AddImitationProcessor(object options)

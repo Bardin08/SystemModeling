@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using SystemModeling.Lab2.ImitationCore.Threads;
 using SystemModeling.Lab2.Options;
+using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
 
@@ -21,6 +23,7 @@ internal sealed class SimulationProcessor
 
         _threadsManager = new ImitationThreadsManager<string>(
             new RoutingMapService(_options.RoutingMap!),
+            new StringEventsProvider(_options.EventProviderOptions),
             _eventsStore,
             _cancellationTokenSource.Token);
     }
@@ -29,10 +32,6 @@ internal sealed class SimulationProcessor
     {
         _cancellationTokenSource.CancelAfter(_options.SimulationTimeSeconds);
 
-        // TODO: Add options for events generation thread
-        FillWithQueueWithEvents(_eventsStore);
-
-        // TODO: Re-Write threads init logic
         ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
         foreach (var descriptor in _options.ProcessorDescriptors)
         {
@@ -45,19 +44,5 @@ internal sealed class SimulationProcessor
 
         await _threadsManager.RunAllAsync();
         await Task.CompletedTask;
-    }
-
-    private void FillWithQueueWithEvents(ConcurrentQueue<EventContext<string>> eventStore)
-    {
-        foreach (var i in Enumerable.Range(0, 5))
-        {
-            eventStore.Enqueue(
-                new EventContext<string>
-                {
-                    EventId = i.ToString(),
-                    NextProcessorName = "processor_1",
-                    Event = $"Event generated at the {i} iteration"
-                });
-        }
     }
 }
