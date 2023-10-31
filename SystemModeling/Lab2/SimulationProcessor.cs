@@ -25,14 +25,23 @@ internal sealed class SimulationProcessor
             _cancellationTokenSource.Token);
     }
 
-    public async Task RunImitationAsync(ImitationOptions options)
+    public async Task RunImitationAsync()
     {
-        _cancellationTokenSource.CancelAfter(options.ImitationTime);
+        _cancellationTokenSource.CancelAfter(_options.SimulationTimeSeconds);
 
         // TODO: Add options for events generation thread
         FillWithQueueWithEvents(_eventsStore);
 
         // TODO: Re-Write threads init logic
+        ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
+        foreach (var descriptor in _options.ProcessorDescriptors)
+        {
+            var processorId = _threadsManager.AddImitationProcessor(descriptor.Value);
+            var processorNode = _options.RoutingMap!.FirstOrDefault(n => n.Name == descriptor.Key);
+
+            ArgumentNullException.ThrowIfNull(processorNode);
+            processorNode.RouteId = processorId.ToString();
+        }
 
         await _threadsManager.RunAllAsync();
         await Task.CompletedTask;
@@ -40,7 +49,7 @@ internal sealed class SimulationProcessor
 
     private void FillWithQueueWithEvents(ConcurrentQueue<EventContext<string>> eventStore)
     {
-        foreach (var i in Enumerable.Range(0, 100))
+        foreach (var i in Enumerable.Range(0, 5))
         {
             eventStore.Enqueue(
                 new EventContext<string>
