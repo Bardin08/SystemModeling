@@ -9,21 +9,19 @@ namespace SystemModeling.Lab2;
 internal sealed class SimulationProcessor
 {
     private readonly SimulationOptions _options;
-    private readonly ConcurrentQueue<EventContext<string>> _eventsStore;
-    private readonly ImitationThreadsManager<string> _threadsManager;
+    private readonly TasksManager<string> _threadsManager;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public SimulationProcessor(SimulationOptions options)
     {
         _options = options;
 
-        _eventsStore = new ConcurrentQueue<EventContext<string>>();
         _cancellationTokenSource = new CancellationTokenSource();
 
-        _threadsManager = new ImitationThreadsManager<string>(
+        _threadsManager = new TasksManager<string>(
             new RoutingMapService(_options.RoutingMap!),
             new StringEventsProvider(_options.EventProviderOptions),
-            _eventsStore,
+            new ConcurrentQueue<EventContext<string>>(),
             _cancellationTokenSource.Token);
     }
 

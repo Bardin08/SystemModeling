@@ -9,7 +9,7 @@ using SystemModeling.Lab2.Routing.Services;
 
 namespace SystemModeling.Lab2;
 
-internal class ImitationThreadsManager<TEvent>
+internal class TasksManager<TEvent>
 {
     private readonly List<Task> _tasksToRun;
     private readonly IEventsRoutingService<TEvent> _router;
@@ -18,7 +18,7 @@ internal class ImitationThreadsManager<TEvent>
     private readonly IImitationProcessorFactory<TEvent> _imitationProcessorFactory;
     private readonly CancellationToken _cancellationToken;
 
-    public ImitationThreadsManager(
+    public TasksManager(
         IRoutingMapService routingMapService,
         IEventsProvider<TEvent> eventsProvider,
         ConcurrentQueue<EventContext<TEvent>> eventStore,
