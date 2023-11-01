@@ -43,10 +43,10 @@ internal class TasksManager<TEvent>
         return Task.WhenAll(_tasksToRun);
     }
 
-    public Guid AddImitationProcessor(object options)
+    public Guid AddImitationProcessor(object options, ProcessorNode processorNode)
     {
         var imitationThreadResult = CreateImitationThread(
-            options, _cancellationToken);
+            options, processorNode, _cancellationToken);
 
         _router.AddRoute(imitationThreadResult.ThreadId.ToString(),
             imitationThreadResult.ChannelWriter);
@@ -57,9 +57,14 @@ internal class TasksManager<TEvent>
     }
 
     private CreateImitationThreadResult<TEvent> CreateImitationThread(
-        object options, CancellationToken ct)
+        object options, ProcessorNode routingNode, CancellationToken ct)
     {
-        var channel = Channel.CreateUnbounded<EventContext<TEvent>>();
+        var channel = routingNode switch
+        {
+            { MaxQueueLength: -1 } => Channel.CreateUnbounded<EventContext<TEvent>>(),
+            { MaxQueueLength: > 0 } => Channel.CreateBounded<EventContext<TEvent>>(routingNode.MaxQueueLength),
+            _ => throw new ArgumentOutOfRangeException(nameof(routingNode), routingNode, null)
+        };
 
         var routingContext = new RoutingContext<TEvent>
         {

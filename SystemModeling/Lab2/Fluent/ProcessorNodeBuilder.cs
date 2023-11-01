@@ -17,6 +17,13 @@ internal class ProcessorNodeBuilder : IProcessorNodeBuilder
         return this;
     }
 
+    /// <inheritdoc />
+    public IProcessorNodeBuilder SetMaxLength(int maxLength = -1)
+    {
+        _processorNode.MaxQueueLength = maxLength;
+        return this;
+    }
+
     public IProcessorNodeBuilder AddTransition(string nextProcessor, double chance)
     {
         _processorNode.Transitions

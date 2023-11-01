@@ -47,7 +47,12 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
 
             if (Handlers.TryGetValue(processorNode.RouteId, out var processor))
             {
-                await processor.WriteAsync(eventCtx, ct);
+                if (!processor.TryWrite(eventCtx))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Event wasn't passed to the processor. {0}", eventCtx.Event);
+                    Console.ResetColor();
+                }
             }
             else
             {

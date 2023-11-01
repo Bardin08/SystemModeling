@@ -31,9 +31,13 @@ internal sealed class SimulationProcessor
         ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
         foreach (var descriptor in _options.ProcessorDescriptors)
         {
-            var processorId = _threadsManager.AddImitationProcessor(descriptor.Value);
-            var processorNode = _options.RoutingMap!.FirstOrDefault(n => n.Name == descriptor.Key);
+            var processorNode = _options.RoutingMap!
+                .FirstOrDefault(n => n.Name == descriptor.Key);
+            ArgumentNullException.ThrowIfNull(processorNode);
 
+            var processorId = _threadsManager
+                .AddImitationProcessor(descriptor.Value, processorNode);
+            
             ArgumentNullException.ThrowIfNull(processorNode);
             processorNode.RouteId = processorId.ToString();
         }

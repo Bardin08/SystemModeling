@@ -14,12 +14,16 @@ public class Lab2Runnable : IRunnable
             .ForSeconds(300)
             .WithEventGenerator(b =>
             {
-                b.EventsAmount = 5;
-                b.AddDelay = TimeSpan.FromSeconds(0.5);
+                b.EventsAmount = 25;
+                b.AddDelay = TimeSpan.FromSeconds(0.05);
             })
             .AndRoutingMap(builder =>
             {
-                builder.AddProcessor("processor_1", pb => { pb.AddTransition("processor_2", 1); })
+                builder.AddProcessor("processor_1", pb =>
+                    {
+                        pb.SetMaxLength(1);
+                        pb.AddTransition("processor_2", 1);
+                    })
                     .UseMultipleConsumers(opt =>
                     {
                         opt.ConsumersAmount = 2;
