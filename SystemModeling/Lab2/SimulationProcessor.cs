@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Events;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
@@ -21,7 +21,7 @@ internal sealed class SimulationProcessor
         _threadsManager = new TasksManager<string>(
             new RoutingMapService(_options.RoutingMap!),
             new StringEventsProvider(_options.EventProviderOptions),
-            new ConcurrentQueue<EventContext<string>>(),
+            Channel.CreateUnbounded<EventContext<string>>(),
             _cancellationTokenSource.Token);
     }
 

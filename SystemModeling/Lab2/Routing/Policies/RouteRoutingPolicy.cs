@@ -5,13 +5,13 @@ using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Routing.Policies;
 
-internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEvent>>
+internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
 {
     private readonly IRoutingMapService _routingMapService;
 
     public RouteRoutingPolicy(
         IRoutingMapService routingMapService,
-        ConcurrentQueue<EventContext<TEvent>> eventsStore,
+        ChannelReader<EventContext<TEvent>> eventsStore,
         ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> handlers)
         : base(eventsStore, handlers)
     {
@@ -22,18 +22,19 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<EventContext<TEven
     {
         while (!ct.IsCancellationRequested)
         {
-            if (EventsStore.IsEmpty)
+            if (EventsStore.Count is 0)
             {
                 Task.Yield();
                 continue;
             }
 
-            if (!EventsStore.TryDequeue(out var eventCtx))
+            if (!EventsStore.TryRead(out var eventCtx))
             {
                 continue;
             }
 
-            var processorNode = _routingMapService.GetProcessorNodeByName(eventCtx.NextProcessorName);
+            var processorNode = _routingMapService
+                .GetProcessorNodeByName(eventCtx.NextProcessorName!);
 
             // no need to route it. Processing complete
             if (processorNode?.Name is "complete")

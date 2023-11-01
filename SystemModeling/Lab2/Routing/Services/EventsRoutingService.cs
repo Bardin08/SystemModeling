@@ -13,13 +13,13 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
     private readonly IRoutingPolicy _routingPolicy;
 
     public EventsRoutingService(
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
+        ChannelReader<EventContext<TEvent>> eventStoreReader,
         IRoutingMapService routingMapService)
     {
         _handlers = new ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>>();
 
         _routingPolicy = new RouteRoutingPolicy<TEvent>(
-            routingMapService, eventStore, _handlers);
+            routingMapService, eventStoreReader, _handlers);
     }
 
     public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)

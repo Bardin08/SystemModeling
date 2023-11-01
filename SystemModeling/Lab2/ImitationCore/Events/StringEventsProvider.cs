@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
@@ -15,20 +15,20 @@ internal class StringEventsProvider : IEventsProvider<string>
     }
 
     public Task FillWithQueueWithEvents(
-        ConcurrentQueue<EventContext<string>> events,
+        ChannelWriter<EventContext<string>> events,
         CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
             foreach (var i in Enumerable.Range(0, _eventProviderOptions.EventsAmount))
             {
-                events.Enqueue(
+                await events.WriteAsync(
                     new EventContext<string>
                     {
                         EventId = i.ToString(),
                         NextProcessorName = "processor_1",
                         Event = $"Event generated at the {i} iteration"
-                    });
+                    }, cancellationToken);
                 await Task.Delay(_eventProviderOptions.AddDelay, cancellationToken);
             }
         }, cancellationToken);

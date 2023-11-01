@@ -1,8 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Processors;
 using SystemModeling.Lab2.Models;
+using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -14,22 +14,22 @@ internal class TasksManager<TEvent>
     private readonly List<Task> _tasksToRun;
     private readonly IEventsRoutingService<TEvent> _router;
     private readonly IEventsProvider<TEvent> _eventsProvider;
-    private readonly ConcurrentQueue<EventContext<TEvent>> _eventStore;
+    private readonly ChannelWriter<EventContext<TEvent>> _eventStoreWriter;
     private readonly IImitationProcessorFactory<TEvent> _imitationProcessorFactory;
     private readonly CancellationToken _cancellationToken;
 
     public TasksManager(
         IRoutingMapService routingMapService,
         IEventsProvider<TEvent> eventsProvider,
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
+        Channel<EventContext<TEvent>> eventStoreChannel,
         CancellationToken cancellationToken)
     {
-        _eventStore = eventStore;
+        _eventStoreWriter = eventStoreChannel.Writer;
         _cancellationToken = cancellationToken;
         _eventsProvider = eventsProvider;
 
         _imitationProcessorFactory = new MultipleConsumersImitationProcessorFactory<TEvent>();
-        _router = new EventsRoutingService<TEvent>(eventStore, routingMapService);
+        _router = new EventsRoutingService<TEvent>(eventStoreChannel.Reader, routingMapService);
         _tasksToRun = new List<Task>();
     }
 
@@ -37,7 +37,7 @@ internal class TasksManager<TEvent>
     {
         // order matters! Provider -> Router
         var eventsProvider = _eventsProvider.FillWithQueueWithEvents(
-            _eventStore, _cancellationToken);
+            _eventStoreWriter, _cancellationToken);
         var routeMessagesTask = _router.RouteAsync(_cancellationToken);
 
         _tasksToRun.AddRange(new[] { eventsProvider, routeMessagesTask });
@@ -62,8 +62,15 @@ internal class TasksManager<TEvent>
     {
         var channel = Channel.CreateUnbounded<EventContext<TEvent>>();
 
-        var (threadId, task) = _imitationProcessorFactory.GetProcessingTask(
-            options, channel.Reader, _eventStore, ct);
+        var routingContext = new RoutingContext<TEvent>
+        {
+            ProcessorOptions = options,
+            ProcessorQueue = channel.Reader,
+            EventsSource = _eventStoreWriter
+        };
+
+        var (threadId, task) = _imitationProcessorFactory
+            .GetProcessingTask(routingContext, ct);
 
         return new CreateImitationThreadResult<TEvent>
         {

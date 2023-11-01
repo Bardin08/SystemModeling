@@ -1,24 +1,21 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
-using System.Threading.Channels;
+﻿using System.Text;
 using Newtonsoft.Json;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
-using SystemModeling.Lab2.Routing.Models;
+using SystemModeling.Lab2.Routing;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
 
-internal class SingleConsumerImitationProcessorFactory<TEvent> : IImitationProcessorFactory<TEvent>
+internal class SingleConsumerImitationProcessorFactory<TEvent>
+    : IImitationProcessorFactory<TEvent>
 {
     public (Guid ThreadId, Task Task) GetProcessingTask(
-        object options,
-        ChannelReader<EventContext<TEvent>> eventsQueue,
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
+        RoutingContext<TEvent> routingContext, 
         CancellationToken ct)
     {
         var threadId = Guid.NewGuid();
 
-        var threadOptions = (options as ImitationProcessorOptions)!;
+        var threadOptions = (routingContext.ProcessorOptions as ImitationProcessorOptions)!;
         threadOptions.ThreadId = threadId;
 
         var task = Task.Run(async () =>
@@ -28,10 +25,10 @@ internal class SingleConsumerImitationProcessorFactory<TEvent> : IImitationProce
             {
                 sb.Clear();
 
-                if (eventsQueue.TryRead(out var @event))
+                if (routingContext.ProcessorQueue.TryRead(out var @event))
                 {
                     sb.Append($"{threadOptions.ThreadId}: Event: {JsonConvert.SerializeObject(@event)}");
-                    eventStore.Enqueue(@event);
+                    await routingContext.EventsSource.WriteAsync(@event, ct);
                 }
 
                 if (sb.Length > 0)

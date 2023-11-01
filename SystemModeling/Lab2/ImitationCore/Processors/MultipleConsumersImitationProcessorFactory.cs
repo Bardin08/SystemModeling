@@ -1,10 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
-using System.Threading.Channels;
+﻿using System.Text;
 using Newtonsoft.Json;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
-using SystemModeling.Lab2.Routing.Models;
+using SystemModeling.Lab2.Routing;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
 
@@ -12,12 +10,9 @@ internal class MultipleConsumersImitationProcessorFactory<TEvent>
     : IImitationProcessorFactory<TEvent>
 {
     public (Guid ThreadId, Task Task) GetProcessingTask(
-        object options,
-        ChannelReader<EventContext<TEvent>> eventsQueue,
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
-        CancellationToken ct)
+        RoutingContext<TEvent> routingContext, CancellationToken ct)
     {
-        var processorOptions = (options as MultiConsumersImitationProcessorOptions)!;
+        var processorOptions = (routingContext.ProcessorOptions as MultiConsumersImitationProcessorOptions)!;
         if (processorOptions.ConsumersAmount < 0 ||
             processorOptions.ProcessorOptions.Count != processorOptions.ConsumersAmount)
         {
@@ -31,8 +26,14 @@ internal class MultipleConsumersImitationProcessorFactory<TEvent>
             foreach (var procOptions in processorOptions.ProcessorOptions)
             {
                 procOptions.ThreadId = threadId;
-                tasks.Add(GetProcessingTaskInternal(
-                    procOptions, eventsQueue, eventStore, ct));
+                var localRoutingContext = new RoutingContext<TEvent>
+                {
+                    ProcessorOptions = procOptions,
+                    EventsSource = routingContext.EventsSource,
+                    ProcessorQueue = routingContext.ProcessorQueue
+                };
+
+                tasks.Add(GetProcessingTaskInternal(localRoutingContext, ct));
             }
 
             await Task.WhenAll(tasks);
@@ -41,37 +42,31 @@ internal class MultipleConsumersImitationProcessorFactory<TEvent>
     }
 
     private Task GetProcessingTaskInternal(
-        ImitationProcessorOptions options,
-        ChannelReader<EventContext<TEvent>> eventsQueue,
-        ConcurrentQueue<EventContext<TEvent>> eventStore,
-        CancellationToken ct)
+        RoutingContext<TEvent> routingContext, CancellationToken ct)
     {
+        var processorOptions = (routingContext.ProcessorOptions as ImitationProcessorOptions)!;
         return Task.Run(async () =>
         {
             var sb = new StringBuilder();
-            var lockObj = new object();
             while (!ct.IsCancellationRequested)
             {
-                lock (lockObj)
+                sb.Clear();
+
+                if (routingContext.ProcessorQueue.TryRead(out var @event))
                 {
-                    sb.Clear();
-
-                    if (eventsQueue.TryRead(out var @event))
-                    {
-                        sb.Append(
-                            $"{options.ThreadId} ({options.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
-                        eventStore.Enqueue(@event);
-                    }
-
-                    if (sb.Length > 0)
-                    {
-                        Console.ForegroundColor = options.Color;
-                        Console.WriteLine(sb.ToString());
-                        Console.ResetColor();
-                    }
+                    sb.Append(
+                        $"{processorOptions.ThreadId} ({processorOptions.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
+                    await routingContext.EventsSource.WriteAsync(@event, ct);
                 }
 
-                await Task.Delay(options.ProcessingTime, CancellationToken.None);
+                if (sb.Length > 0)
+                {
+                    Console.ForegroundColor = processorOptions.Color;
+                    Console.WriteLine(sb.ToString());
+                    Console.ResetColor();
+                }
+
+                await Task.Delay(processorOptions.ProcessingTime, CancellationToken.None);
             }
         }, ct);
     }
