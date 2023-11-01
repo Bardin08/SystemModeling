@@ -1,5 +1,4 @@
-﻿using System.Threading.Channels;
-using SystemModeling.Lab2.Routing.Models;
+﻿using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Routing.Interfaces;
 
