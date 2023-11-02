@@ -1,4 +1,5 @@
 ﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+using SystemModeling.Lab2.ImitationCore.Observers;
 using SystemModeling.Lab2.ImitationCore.Processors;
 using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Routing;
@@ -14,7 +15,7 @@ internal class TasksManager<TEvent>
     private readonly IEventsRoutingService<TEvent> _router;
     private readonly IEventsProvider<TEvent> _eventsProvider;
     private readonly ChannelWriter<EventContext<TEvent>> _eventStoreWriter;
-    private readonly IImitationProcessorFactory<TEvent> _imitationProcessorFactory;
+    private readonly IImitationProcessor<TEvent> _imitationProcessor;
     private readonly CancellationToken _cancellationToken;
 
     public TasksManager(
@@ -27,7 +28,8 @@ internal class TasksManager<TEvent>
         _cancellationToken = cancellationToken;
         _eventsProvider = eventsProvider;
 
-        _imitationProcessorFactory = new MultipleConsumersImitationProcessorFactory<TEvent>();
+        _imitationProcessor = new MultipleConsumersImitationProcessor<TEvent>();
+        (_imitationProcessor as IObservable)!.RegisterHandler(new ProcessorEventConsumptionObserver());
         _router = new EventsRoutingService<TEvent>(eventStoreChannel.Reader, routingMapService);
         _tasksToRun = new List<Task>();
     }
@@ -73,7 +75,7 @@ internal class TasksManager<TEvent>
             EventsSource = _eventStoreWriter
         };
 
-        var (threadId, task) = _imitationProcessorFactory
+        var (threadId, task) = _imitationProcessor
             .GetProcessingTask(routingContext, ct);
 
         return new CreateImitationThreadResult<TEvent>

@@ -4,8 +4,8 @@ using SystemModeling.Lab2.Routing;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
 
-internal class SingleConsumerImitationProcessorFactory<TEvent>
-    : IImitationProcessorFactory<TEvent>
+internal class SingleConsumerImitationProcessor<TEvent>
+    : IImitationProcessor<TEvent>
 {
     public (Guid ThreadId, Task Task) GetProcessingTask(
         RoutingContext<TEvent> routingContext, 

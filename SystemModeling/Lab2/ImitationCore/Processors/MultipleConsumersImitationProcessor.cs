@@ -4,9 +4,11 @@ using SystemModeling.Lab2.Routing;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
 
-internal class MultipleConsumersImitationProcessorFactory<TEvent>
-    : IImitationProcessorFactory<TEvent>
+internal class MultipleConsumersImitationProcessor<TEvent>
+    : IImitationProcessor<TEvent>, IObservable
 {
+    private readonly List<IObserver> _observers = new();
+
     public (Guid ThreadId, Task Task) GetProcessingTask(
         RoutingContext<TEvent> routingContext, CancellationToken ct)
     {
@@ -52,20 +54,38 @@ internal class MultipleConsumersImitationProcessorFactory<TEvent>
 
                 if (routingContext.ProcessorQueue.TryRead(out var @event))
                 {
-                    sb.Append(
-                        $"{processorOptions.ThreadId} ({processorOptions.Alias}): Event: {JsonConvert.SerializeObject(@event)}");
+                    const string format = "{0} ({1}): Event: {2}";
+                    sb.AppendFormat(format, processorOptions.ThreadId, processorOptions.Alias,
+                        JsonConvert.SerializeObject(@event));
                     await routingContext.EventsSource.WriteAsync(@event, ct);
-                }
 
-                if (sb.Length > 0)
-                {
-                    Console.ForegroundColor = processorOptions.Color;
-                    Console.WriteLine(sb.ToString());
-                    Console.ResetColor();
+                    if (sb.Length > 0)
+                    {
+                        Console.ForegroundColor = processorOptions.Color;
+                        Console.WriteLine(sb.ToString());
+                        Console.ResetColor();
+                    }
+
+                    Notify();
                 }
 
                 await Task.Delay(processorOptions.ProcessingTime, CancellationToken.None);
             }
         }, ct);
+    }
+
+    public void RegisterHandler(IObserver observer)
+    {
+        _observers.Add(observer);
+    }
+
+    public void RemoveHandler(IObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+
+    public void Notify()
+    {
+        _observers.ForEach(o => o.Handle(this));
     }
 }
