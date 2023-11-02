@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SystemModeling.Lab2.ImitationCore.Interfaces;
+﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing;
 

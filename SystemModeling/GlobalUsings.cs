@@ -3,3 +3,4 @@
 global using System.Collections.Concurrent;
 global using System.Text;
 global using System.Threading.Channels;
+global using Newtonsoft.Json;
