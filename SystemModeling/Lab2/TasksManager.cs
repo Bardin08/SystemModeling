@@ -68,7 +68,7 @@ internal class TasksManager<TEvent>
             channel.Reader,
             options,
             _cancellationTokenSource);
-        imitationProcessor.RegisterHandler(new ProcessorEventConsumptionObserver());
+        imitationProcessor.RegisterHandler(new EventProcessorStateObserver());
 
 
         var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);

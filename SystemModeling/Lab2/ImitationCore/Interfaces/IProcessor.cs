@@ -2,5 +2,8 @@
 
 internal interface IProcessor
 {
+    public Guid ProcessorId { get; }
+    public int QueueSize { get; }
+
     Task ProcessAsync(CancellationToken cancellationToken);
 }

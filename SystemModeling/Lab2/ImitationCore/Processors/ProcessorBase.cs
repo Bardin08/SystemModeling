@@ -6,8 +6,9 @@ namespace SystemModeling.Lab2.ImitationCore.Processors;
 internal abstract class ProcessorBase<TEvent> :
     IProcessor, IObservable
 {
-    public Guid ProcessorId { get; set; }
-
+    public Guid ProcessorId { get; }
+    public int QueueSize => ProcessorQueue.Count;
+    
     private readonly List<IObserver> _observers = new();
 
     protected readonly ChannelWriter<EventContext<TEvent>> RouterQueue;
