@@ -21,7 +21,7 @@ internal sealed class SimulationProcessor
             new RoutingMapService(_options.RoutingMap!),
             new StringEventsProvider(_options.EventProviderOptions),
             Channel.CreateUnbounded<EventContext<string>>(),
-            _cancellationTokenSource.Token);
+            _cancellationTokenSource);
     }
 
     public async Task RunImitationAsync()

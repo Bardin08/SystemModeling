@@ -2,7 +2,6 @@
 using SystemModeling.Lab2.ImitationCore.Observers;
 using SystemModeling.Lab2.ImitationCore.Processors;
 using SystemModeling.Lab2.Models;
-using SystemModeling.Lab2.Routing;
 using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -15,21 +14,18 @@ internal class TasksManager<TEvent>
     private readonly IEventsRoutingService<TEvent> _router;
     private readonly IEventsProvider<TEvent> _eventsProvider;
     private readonly ChannelWriter<EventContext<TEvent>> _eventStoreWriter;
-    private readonly IImitationProcessor<TEvent> _imitationProcessor;
-    private readonly CancellationToken _cancellationToken;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     public TasksManager(
         IRoutingMapService routingMapService,
         IEventsProvider<TEvent> eventsProvider,
         Channel<EventContext<TEvent>> eventStoreChannel,
-        CancellationToken cancellationToken)
+        CancellationTokenSource cancellationTokenSource)
     {
         _eventStoreWriter = eventStoreChannel.Writer;
-        _cancellationToken = cancellationToken;
+        _cancellationTokenSource = cancellationTokenSource;
         _eventsProvider = eventsProvider;
 
-        _imitationProcessor = new MultipleConsumersImitationProcessor<TEvent>();
-        (_imitationProcessor as IObservable)!.RegisterHandler(new ProcessorEventConsumptionObserver());
         _router = new EventsRoutingService<TEvent>(eventStoreChannel.Reader, routingMapService);
         _tasksToRun = new List<Task>();
     }
@@ -38,8 +34,8 @@ internal class TasksManager<TEvent>
     {
         // order matters! Provider -> Router
         var eventsProvider = _eventsProvider.FillWithQueueWithEvents(
-            _eventStoreWriter, _cancellationToken);
-        var routeMessagesTask = _router.RouteAsync(_cancellationToken);
+            _eventStoreWriter, _cancellationTokenSource.Token);
+        var routeMessagesTask = _router.RouteAsync(_cancellationTokenSource.Token);
 
         _tasksToRun.AddRange(new[] { eventsProvider, routeMessagesTask });
         return Task.WhenAll(_tasksToRun);
@@ -47,8 +43,7 @@ internal class TasksManager<TEvent>
 
     public Guid AddImitationProcessor(object options, ProcessorNode processorNode)
     {
-        var imitationThreadResult = CreateImitationThread(
-            options, processorNode, _cancellationToken);
+        var imitationThreadResult = CreateImitationThread(options, processorNode);
 
         _router.AddRoute(imitationThreadResult.ThreadId.ToString(),
             imitationThreadResult.ChannelWriter);
@@ -59,7 +54,7 @@ internal class TasksManager<TEvent>
     }
 
     private CreateImitationThreadResult<TEvent> CreateImitationThread(
-        object options, ProcessorNode routingNode, CancellationToken ct)
+        object options, ProcessorNode routingNode)
     {
         var channel = routingNode switch
         {
@@ -68,19 +63,19 @@ internal class TasksManager<TEvent>
             _ => throw new ArgumentOutOfRangeException(nameof(routingNode), routingNode, null)
         };
 
-        var routingContext = new RoutingContext<TEvent>
-        {
-            ProcessorOptions = options,
-            ProcessorQueue = channel.Reader,
-            EventsSource = _eventStoreWriter
-        };
+        var imitationProcessor = new EventsProcessorWithMultipleConsumers<TEvent>(
+            _eventStoreWriter,
+            channel.Reader,
+            options,
+            _cancellationTokenSource);
+        imitationProcessor.RegisterHandler(new ProcessorEventConsumptionObserver());
 
-        var (threadId, task) = _imitationProcessor
-            .GetProcessingTask(routingContext, ct);
+
+        var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);
 
         return new CreateImitationThreadResult<TEvent>
         {
-            ThreadId = threadId,
+            ThreadId = imitationProcessor.ProcessorId,
             ChannelWriter = channel.Writer,
             ThreadExecutable = task
         };

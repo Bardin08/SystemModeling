@@ -8,5 +8,5 @@ internal interface IRoutingMapBuilder
         string processorName, Action<IProcessorNodeBuilder> factory);
 
     void UseSingleConsumer(Action<ImitationProcessorOptions> factory);
-    void UseMultipleConsumers(Action<MultiConsumersImitationProcessorOptions> factory);
+    void UseMultipleConsumers(Action<ProcessorWithMultipleConsumersOptions> factory);
 }

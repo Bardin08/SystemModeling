@@ -45,14 +45,14 @@ internal class RoutingMapBuilder : IRoutingMapBuilder
     }
 
     public void UseMultipleConsumers(
-        Action<MultiConsumersImitationProcessorOptions> factory)
+        Action<ProcessorWithMultipleConsumersOptions> factory)
     {
         if (_currentProcessorNode is null)
         {
             throw new Exception("There is no configured processors");
         }
 
-        var options = new MultiConsumersImitationProcessorOptions();
+        var options = new ProcessorWithMultipleConsumersOptions();
         factory(options);
         _processorOptions.Add(_currentProcessorNode.Name!, options);
     }
