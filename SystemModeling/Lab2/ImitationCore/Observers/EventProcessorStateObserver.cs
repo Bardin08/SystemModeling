@@ -4,6 +4,8 @@ namespace SystemModeling.Lab2.ImitationCore.Observers;
 
 internal class EventProcessorStateObserver : IObserver
 {
+    private readonly object _lockObj = new();
+
     private int _totalQueueSize;
     private int _queueSizeObservations;
     private double _totalLoadTime;
@@ -11,19 +13,23 @@ internal class EventProcessorStateObserver : IObserver
 
     public void Handle(IObservable observable)
     {
-        var processor = observable as IProcessor;
-        ArgumentNullException.ThrowIfNull(processor);
+        lock (_lockObj)
+        {
+            var processor = observable as IProcessor;
+            ArgumentNullException.ThrowIfNull(processor);
 
-        UpdateMetrics(processor.QueueSize, processor.ProcessingTime);
-        var sb = new StringBuilder();
-        sb.Append($"ThreadId: {processor.ProcessorId}. ").AppendLine()
-            .Append($"Current Queue Size: {processor.QueueSize}").AppendLine()
-            .Append($"Mean Queue Size: {MeanQueueLength}").AppendLine()
-            .Append($"Mean Load Time: {MeanLoadTime}").AppendLine();
+            UpdateMetrics(processor.QueueSize, processor.ProcessingTime);
 
-        Console.ForegroundColor = ConsoleColor.DarkCyan;
-        Console.WriteLine(sb.ToString());
-        Console.ResetColor();
+            var sb = new StringBuilder();
+            sb.Append($"ThreadId: {processor.ProcessorId}. ").AppendLine()
+                .Append($"Current Queue Size: {processor.QueueSize}").AppendLine()
+                .Append($"Mean Queue Size: {MeanQueueLength}").AppendLine()
+                .Append($"Mean Load Time: {MeanLoadTime}").AppendLine();
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine(sb.ToString());
+            Console.ResetColor();
+        }
     }
 
     private void UpdateMetrics(int queueSize, TimeSpan processingTime)
@@ -31,7 +37,7 @@ internal class EventProcessorStateObserver : IObserver
         _totalQueueSize += queueSize;
         _queueSizeObservations++;
 
-        _totalLoadTime += processingTime.TotalSeconds;
+        _totalLoadTime += processingTime.TotalMilliseconds;
         _loadTimeObservations++;
     }
 
