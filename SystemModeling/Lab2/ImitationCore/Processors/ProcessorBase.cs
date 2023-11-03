@@ -8,7 +8,8 @@ internal abstract class ProcessorBase<TEvent> :
 {
     public Guid ProcessorId { get; }
     public int QueueSize => ProcessorQueue.Count;
-    
+    public TimeSpan ProcessingTime { get; set; }
+
     private readonly List<IObserver> _observers = new();
 
     protected readonly ChannelWriter<EventContext<TEvent>> RouterQueue;

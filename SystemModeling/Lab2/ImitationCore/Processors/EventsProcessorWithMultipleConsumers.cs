@@ -52,6 +52,8 @@ internal class EventsProcessorWithMultipleConsumers<TEvent> : ProcessorBase<TEve
 
                 if (ProcessorQueue.TryRead(out var @event))
                 {
+                    ProcessingTime = options.ProcessingTime;
+
                     const string format = "{0} ({1}): Event: {2}";
                     sb.AppendFormat(format, ProcessorId, options.Alias,
                         JsonConvert.SerializeObject(@event));
