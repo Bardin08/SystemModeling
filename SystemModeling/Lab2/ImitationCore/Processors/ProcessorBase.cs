@@ -8,7 +8,7 @@ internal abstract class ProcessorBase<TEvent> :
 {
     public Guid ProcessorId { get; }
     public int QueueSize => ProcessorQueue.Count;
-    public TimeSpan ProcessingTime { get; set; }
+    public TimeSpan ProcessingTime { get; protected set; }
 
     private readonly List<IObserver> _observers = new();
 
@@ -30,12 +30,12 @@ internal abstract class ProcessorBase<TEvent> :
         ProcessorId = Guid.NewGuid();
     }
 
-    public void RegisterHandler(IObserver observer)
+    public void RegisterObserver(IObserver observer)
     {
         _observers.Add(observer);
     }
 
-    public void RemoveHandler(IObserver observer)
+    public void RemoveObserver(IObserver observer)
     {
         _observers.Remove(observer);
     }

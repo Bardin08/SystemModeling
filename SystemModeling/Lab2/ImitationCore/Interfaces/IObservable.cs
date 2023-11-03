@@ -2,7 +2,7 @@
 
 internal interface IObservable
 {
-    void RegisterHandler(IObserver observer);
-    void RemoveHandler(IObserver observer);
+    void RegisterObserver(IObserver observer);
+    void RemoveObserver(IObserver observer);
     void Notify();
 }

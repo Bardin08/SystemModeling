@@ -1,8 +1,9 @@
 ﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+using SystemModeling.Lab2.ImitationCore.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Observers;
 
-internal class EventProcessorStateObserver : IObserver
+internal class EventProcessorStateObserver : IEventProcessorStateObserver
 {
     private readonly object _lockObj = new();
 
@@ -39,6 +40,17 @@ internal class EventProcessorStateObserver : IObserver
 
         _totalLoadTime += processingTime.TotalMilliseconds;
         _loadTimeObservations++;
+    }
+
+    public ProcessorStatisticsDto GetProcessorStatistics()
+    {
+        return new ProcessorStatisticsDto
+        {
+            LoadTimeObservations = _loadTimeObservations,
+            TotalLoadTime = _totalLoadTime,
+            TotalQueueSize = _totalQueueSize,
+            QueueSizeObservations = _queueSizeObservations
+        };
     }
 
     private double MeanQueueLength => _queueSizeObservations > 0

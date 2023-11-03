@@ -1,7 +1,7 @@
 ﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+using SystemModeling.Lab2.ImitationCore.Models;
 using SystemModeling.Lab2.ImitationCore.Observers;
 using SystemModeling.Lab2.ImitationCore.Processors;
-using SystemModeling.Lab2.Models;
 using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -53,7 +53,7 @@ internal class TasksManager<TEvent>
         return imitationThreadResult.ThreadId;
     }
 
-    private CreateImitationThreadResult<TEvent> CreateImitationThread(
+    private CreateProcessorResultDto<TEvent> CreateImitationThread(
         object options, ProcessorNode routingNode)
     {
         var channel = routingNode switch
@@ -68,12 +68,12 @@ internal class TasksManager<TEvent>
             channel.Reader,
             options,
             _cancellationTokenSource);
-        imitationProcessor.RegisterHandler(new EventProcessorStateObserver());
+        imitationProcessor.RegisterObserver(new EventProcessorStateObserver());
 
 
         var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);
 
-        return new CreateImitationThreadResult<TEvent>
+        return new CreateProcessorResultDto<TEvent>
         {
             ThreadId = imitationProcessor.ProcessorId,
             ChannelWriter = channel.Writer,
