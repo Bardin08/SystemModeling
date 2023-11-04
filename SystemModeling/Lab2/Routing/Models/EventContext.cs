@@ -2,8 +2,8 @@
 
 public class EventContext<TEvent>
 {
-    public string? EventId { get; set; }
+    public string? EventId { get; init; }
     public string? NextProcessorName { get; set; }
 
-    public TEvent? Event { get; set; }
+    public TEvent? Event { get; init; }
 }
