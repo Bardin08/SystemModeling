@@ -7,10 +7,17 @@ internal class EventProcessorStateObserver : IEventProcessorStateObserver
 {
     private readonly object _lockObj = new();
 
+    private readonly Guid _processorId;
+
     private int _totalQueueSize;
     private int _queueSizeObservations;
     private double _totalLoadTime;
     private int _loadTimeObservations;
+
+    public EventProcessorStateObserver(Guid processorId)
+    {
+        _processorId = processorId;
+    }
 
     public void Handle(IObservable observable)
     {
@@ -46,10 +53,13 @@ internal class EventProcessorStateObserver : IEventProcessorStateObserver
     {
         return new ProcessorStatisticsDto
         {
+            ProcessorId = _processorId,
             LoadTimeObservations = _loadTimeObservations,
             TotalLoadTime = _totalLoadTime,
             TotalQueueSize = _totalQueueSize,
-            QueueSizeObservations = _queueSizeObservations
+            QueueSizeObservations = _queueSizeObservations,
+            MeadQueueLength = MeanQueueLength,
+            MeanLoadTime = MeanLoadTime
         };
     }
 

@@ -16,7 +16,7 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
         _routingMapService = routingMapService;
     }
 
-    public override async Task RouteAsync(object? parameters, CancellationToken ct)
+    public override Task RouteAsync(object? parameters, CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
@@ -64,12 +64,13 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
             foreach (var transition in processorNode.Transitions)
             {
                 cumulative += transition.TransitionChance;
-                if (cumulative >= randomNumber)
-                {
-                    eventCtx.NextProcessorName = transition.ProcessorName;
-                    break;
-                }
+                if (!(cumulative >= randomNumber)) continue;
+
+                eventCtx.NextProcessorName = transition.ProcessorName;
+                break;
             }
         }
+
+        return Task.CompletedTask;
     }
 }

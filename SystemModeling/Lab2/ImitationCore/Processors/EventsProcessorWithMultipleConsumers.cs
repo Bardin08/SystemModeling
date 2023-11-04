@@ -5,7 +5,7 @@ namespace SystemModeling.Lab2.ImitationCore.Processors;
 
 internal class EventsProcessorWithMultipleConsumers<TEvent> : ProcessorBase<TEvent>
 {
-    public ProcessorWithMultipleConsumersOptions ProcessorOptions { get; }
+    private ProcessorWithMultipleConsumersOptions ProcessorOptions { get; }
 
     public EventsProcessorWithMultipleConsumers(
         ChannelWriter<EventContext<TEvent>> routerQueue,
@@ -48,6 +48,8 @@ internal class EventsProcessorWithMultipleConsumers<TEvent> : ProcessorBase<TEve
             var sb = new StringBuilder();
             while (!ct.IsCancellationRequested)
             {
+                if (ProcessorQueue.Completion.IsCompleted) break;
+
                 sb.Clear();
 
                 if (ProcessorQueue.TryRead(out var @event))

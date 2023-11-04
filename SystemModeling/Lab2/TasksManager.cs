@@ -19,7 +19,7 @@ internal class TasksManager<TEvent>
     public TasksManager(
         IRoutingMapService routingMapService,
         IEventsProvider<TEvent> eventsProvider,
-        Channel<EventContext<TEvent>> eventStoreChannel,
+        Channel<EventContext<TEvent>, EventContext<TEvent>> eventStoreChannel,
         CancellationTokenSource cancellationTokenSource)
     {
         _eventStoreWriter = eventStoreChannel.Writer;
@@ -41,7 +41,7 @@ internal class TasksManager<TEvent>
         return Task.WhenAll(_tasksToRun);
     }
 
-    public Guid AddImitationProcessor(object options, ProcessorNode processorNode)
+    public CreateProcessorResultDto<TEvent> AddImitationProcessor(object options, ProcessorNode processorNode)
     {
         var imitationThreadResult = CreateImitationThread(options, processorNode);
 
@@ -50,7 +50,7 @@ internal class TasksManager<TEvent>
 
         _tasksToRun.Add(imitationThreadResult.ThreadExecutable);
 
-        return imitationThreadResult.ThreadId;
+        return imitationThreadResult;
     }
 
     private CreateProcessorResultDto<TEvent> CreateImitationThread(
@@ -68,8 +68,8 @@ internal class TasksManager<TEvent>
             channel.Reader,
             options,
             _cancellationTokenSource);
-        imitationProcessor.RegisterObserver(new EventProcessorStateObserver());
-
+        var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId);
+        imitationProcessor.RegisterObserver(statisticsObserver);
 
         var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);
 
@@ -77,7 +77,9 @@ internal class TasksManager<TEvent>
         {
             ThreadId = imitationProcessor.ProcessorId,
             ChannelWriter = channel.Writer,
-            ThreadExecutable = task
+            ThreadExecutable = task,
+            GetProcessorStatsFunc = () => (statisticsObserver as IEventProcessorStateObserver)
+                .GetProcessorStatistics()
         };
     }
 }

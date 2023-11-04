@@ -6,7 +6,7 @@ namespace SystemModeling.Lab2.ImitationCore.Processors;
 internal class EventsProcessorWithSingleConsumer<TEvent>
     : ProcessorBase<TEvent>
 {
-    public ImitationProcessorOptions ProcessorOptions { get; set; }
+    private ImitationProcessorOptions ProcessorOptions { get; }
 
     public EventsProcessorWithSingleConsumer(
         ChannelWriter<EventContext<TEvent>> routerQueue,

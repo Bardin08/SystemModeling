@@ -6,9 +6,9 @@ namespace SystemModeling.Lab2.ImitationCore.Events;
 
 internal class StringEventsProvider : IEventsProvider<string>
 {
-    private readonly EventProviderOptions _eventProviderOptions;
+    private readonly EventProviderOptions? _eventProviderOptions;
 
-    public StringEventsProvider(EventProviderOptions eventProviderOptions)
+    public StringEventsProvider(EventProviderOptions? eventProviderOptions)
     {
         _eventProviderOptions = eventProviderOptions;
     }

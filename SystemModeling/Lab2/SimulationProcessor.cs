@@ -1,4 +1,5 @@
 ﻿using SystemModeling.Lab2.ImitationCore.Events;
+using SystemModeling.Lab2.ImitationCore.Models;
 using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Services;
@@ -28,6 +29,8 @@ internal sealed class SimulationProcessor
     {
         _cancellationTokenSource.CancelAfter(_options.SimulationTimeSeconds);
 
+        var statisticsCollectors = new List<Func<ProcessorStatisticsDto>?>();
+
         ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
         foreach (var descriptor in _options.ProcessorDescriptors)
         {
@@ -35,14 +38,38 @@ internal sealed class SimulationProcessor
                 .FirstOrDefault(n => n.Name == descriptor.Key);
             ArgumentNullException.ThrowIfNull(processorNode);
 
-            var processorId = _threadsManager
+            var processorInfo = _threadsManager
                 .AddImitationProcessor(descriptor.Value, processorNode);
-            
+
             ArgumentNullException.ThrowIfNull(processorNode);
-            processorNode.RouteId = processorId.ToString();
+            processorNode.RouteId = processorInfo.ThreadId.ToString();
+
+            statisticsCollectors.Add(processorInfo.GetProcessorStatsFunc);
         }
 
         await _threadsManager.RunAllAsync();
+
+        var fetchedStats = statisticsCollectors
+            .Where(collector => collector is not null)
+            .Select(collector => collector!())
+            .ToList();
+
+        if (!fetchedStats.Any()) return;
+
+        var sb = new StringBuilder();
+        foreach (var statsInfo in fetchedStats)
+        {
+            sb.Append($"ThreadId: {statsInfo.ProcessorId}. ").AppendLine()
+                .Append($"Mean Queue Size: {statsInfo}").AppendLine()
+                .Append($"Mean Load Time: {statsInfo}").AppendLine();
+
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine(sb.ToString());
+            Console.ResetColor();
+        }
+
+        sb.Clear();
+
         await Task.CompletedTask;
     }
 }

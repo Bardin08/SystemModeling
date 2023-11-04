@@ -7,5 +7,5 @@ internal record SimulationOptions
     public TimeSpan SimulationTimeSeconds { get; set; }
     public Dictionary<string, object>? ProcessorDescriptors { get; set; } = new();
     public List<ProcessorNode>? RoutingMap { get; set; }
-    public EventProviderOptions EventProviderOptions { get; set; }
+    public EventProviderOptions? EventProviderOptions { get; set; }
 }
