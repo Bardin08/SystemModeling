@@ -64,10 +64,8 @@ internal class TasksManager<TEvent>
         };
 
         var imitationProcessor = new EventsProcessorWithMultipleConsumers<TEvent>(
-            _eventStoreWriter,
-            channel.Reader,
-            options,
-            _cancellationTokenSource);
+            _eventStoreWriter, channel.Reader, options, _cancellationTokenSource);
+
         var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId);
         imitationProcessor.RegisterObserver(statisticsObserver);
 

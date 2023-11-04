@@ -59,7 +59,15 @@ internal class EventsProcessorWithMultipleConsumers<TEvent> : ProcessorBase<TEve
                     const string format = "{0} ({1}): Event: {2}";
                     sb.AppendFormat(format, ProcessorId, options.Alias,
                         JsonConvert.SerializeObject(@event));
-                    await RouterQueue.WriteAsync(@event, ct);
+
+                    try
+                    {
+                        await RouterQueue.WriteAsync(@event, ct);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
 
                     if (sb.Length > 0)
                     {

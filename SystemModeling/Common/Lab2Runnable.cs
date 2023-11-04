@@ -11,7 +11,7 @@ public class Lab2Runnable : IRunnable
         var simulationProcessor = SimulationProcessorBuilder
             .CreateBuilder()
             .Simulate()
-            .ForSeconds(300)
+            .ForSeconds(5)
             .WithEventGenerator(b =>
             {
                 b.EventsAmount = 25;

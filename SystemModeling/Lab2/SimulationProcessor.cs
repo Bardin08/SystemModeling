@@ -49,6 +49,13 @@ internal sealed class SimulationProcessor
 
         await _threadsManager.RunAllAsync();
 
+        PrintProcessorStatistics(statisticsCollectors);
+
+        await Task.CompletedTask;
+    }
+
+    private static void PrintProcessorStatistics(IEnumerable<Func<ProcessorStatisticsDto>?> statisticsCollectors)
+    {
         var fetchedStats = statisticsCollectors
             .Where(collector => collector is not null)
             .Select(collector => collector!())
@@ -60,16 +67,14 @@ internal sealed class SimulationProcessor
         foreach (var statsInfo in fetchedStats)
         {
             sb.Append($"ThreadId: {statsInfo.ProcessorId}. ").AppendLine()
-                .Append($"Mean Queue Size: {statsInfo}").AppendLine()
-                .Append($"Mean Load Time: {statsInfo}").AppendLine();
+                .Append($"Mean Queue Size: {statsInfo.MeadQueueLength}").AppendLine()
+                .Append($"Mean Load Time: {statsInfo.MeanLoadTime}").AppendLine();
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine(sb.ToString());
             Console.ResetColor();
+
+            sb.Clear();
         }
-
-        sb.Clear();
-
-        await Task.CompletedTask;
     }
 }
