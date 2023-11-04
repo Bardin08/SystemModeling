@@ -1,4 +1,5 @@
-﻿using SystemModeling.Lab2.Routing.Interfaces;
+﻿using SystemModeling.Lab2.ImitationCore.Observers;
+using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Routing.Policies;
@@ -47,12 +48,23 @@ internal class RouteRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
 
             if (Handlers.TryGetValue(processorNode.RouteId, out var processor))
             {
-                if (!processor.TryWrite(eventCtx))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Event wasn't passed to the processor. {0}", eventCtx.Event);
-                    Console.ResetColor();
-                }
+                RoutingResult<TEvent>? routingResult;
+                if (processor.TryWrite(eventCtx))
+                    routingResult = new RoutingResult<TEvent>
+                    {
+                        IsSuccess = true,
+                        EventContext = eventCtx,
+                        TargetedProcessor = processorNode.Name ?? "name not defined"
+                    };
+                else
+                    routingResult = new RoutingResult<TEvent>
+                    {
+                        IsSuccess = false,
+                        EventContext = eventCtx,
+                        TargetedProcessor = processorNode.Name ?? "name not defined"
+                    };
+
+                Notify(routingResult);
             }
             else
             {

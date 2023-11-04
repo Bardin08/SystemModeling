@@ -6,3 +6,10 @@ internal interface IObservable
     void RemoveObserver(IObserver observer);
     void Notify();
 }
+
+internal interface IObservableTyped<TReturnType>
+{
+    void RegisterObserver(IObserverTyped<TReturnType> observer);
+    void RemoveObserver(IObserverTyped<TReturnType> observer);
+    void Notify(TReturnType observable);
+}

@@ -1,4 +1,5 @@
-﻿using SystemModeling.Lab2.Routing.Interfaces;
+﻿using SystemModeling.Lab2.ImitationCore.Observers;
+using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 using SystemModeling.Lab2.Routing.Policies;
 
@@ -8,7 +9,7 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
 {
     private readonly ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> _handlers;
 
-    private readonly IRoutingPolicy _routingPolicy;
+    private readonly IRoutingPolicy<TEvent> _routingPolicy;
 
     public EventsRoutingService(
         ChannelReader<EventContext<TEvent>> eventStoreReader,
@@ -18,6 +19,7 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
 
         _routingPolicy = new RouteRoutingPolicy<TEvent>(
             routingMapService, eventStoreReader, _handlers);
+        _routingPolicy.RegisterObserver(new RoutingObserver<TEvent>());
     }
 
     public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)

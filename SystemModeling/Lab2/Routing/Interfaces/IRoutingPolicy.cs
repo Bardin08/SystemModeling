@@ -1,6 +1,9 @@
-﻿namespace SystemModeling.Lab2.Routing.Interfaces;
+﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+using SystemModeling.Lab2.ImitationCore.Observers;
 
-internal interface IRoutingPolicy
+namespace SystemModeling.Lab2.Routing.Interfaces;
+
+internal interface IRoutingPolicy<TEvent> : IObservableTyped<RoutingResult<TEvent>>
 {
     Task RouteAsync(object? parameters, CancellationToken ct);
 }
