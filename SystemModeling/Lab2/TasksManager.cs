@@ -77,7 +77,8 @@ internal class TasksManager<TEvent>
             ChannelWriter = channel.Writer,
             ThreadExecutable = task,
             GetProcessorStatsFunc = () => (statisticsObserver as IEventProcessorStateObserver)
-                .GetProcessorStatistics()
+                .GetProcessorStatistics()!,
+            RoutingStatsFunc = () => _router.RoutingResultObserver(routingNode.Name!)
         };
     }
 }

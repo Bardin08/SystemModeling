@@ -10,6 +10,7 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
     private readonly ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> _handlers;
 
     private readonly IRoutingPolicy<TEvent> _routingPolicy;
+    private readonly RoutingObserver<TEvent> _routingObserver;
 
     public EventsRoutingService(
         ChannelReader<EventContext<TEvent>> eventStoreReader,
@@ -19,7 +20,14 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
 
         _routingPolicy = new RouteRoutingPolicy<TEvent>(
             routingMapService, eventStoreReader, _handlers);
-        _routingPolicy.RegisterObserver(new RoutingObserver<TEvent>());
+
+        _routingObserver = new RoutingObserver<TEvent>();
+        _routingPolicy.RegisterObserver(_routingObserver);
+    }
+
+    public ProcessorRoutingDescriptor RoutingResultObserver(string processorName)
+    {
+        return _routingObserver.AddAndGetProcessorStats(processorName);
     }
 
     public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)

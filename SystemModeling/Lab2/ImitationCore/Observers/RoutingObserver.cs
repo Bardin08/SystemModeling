@@ -1,34 +1,53 @@
-﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+﻿using SystemModeling.Lab2.Routing.Interfaces;
 using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Observers;
 
-internal class RoutingObserver<TEvent> : IObserverTyped<RoutingResult<TEvent>>
+internal class RoutingObserver<TEvent> : IRoutingObserver<TEvent>
 {
-    private int _totalRoutedEvents;
-    private int _totalFailedEvents;
-
-    public decimal MeanFailChance => (decimal)_totalRoutedEvents / _totalFailedEvents;
+    private readonly ConcurrentDictionary<string, ProcessorRoutingDescriptor> _descriptors = new();
 
     public void Handle(RoutingResult<TEvent> ctx)
     {
-        _totalRoutedEvents++;
+        if (!_descriptors.TryGetValue(ctx.TargetedProcessor, out var descriptor))
+        {
+            descriptor = new ProcessorRoutingDescriptor
+            {
+                ProcessorName = ctx.TargetedProcessor,
+                TotalRoutedEvents = 1
+            };
+            _descriptors.TryAdd(ctx.TargetedProcessor, descriptor);
+        }
+
+        descriptor.TotalRoutedEvents++;
 
         if (!ctx.IsSuccess)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Event wasn't passed to the {0}. {1}", ctx.TargetedProcessor, ctx.EventContext.Event);
-            Console.ResetColor();
-
-            _totalFailedEvents++;
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine("Event was passed to the {0}. {1}", ctx.TargetedProcessor, ctx.EventContext.Event);
-            Console.ResetColor();
+            descriptor.FailedEvents++;
         }
     }
+
+    public ProcessorRoutingDescriptor AddAndGetProcessorStats(string processorName)
+    {
+        var descriptor = new ProcessorRoutingDescriptor
+        {
+            ProcessorName = processorName
+        };
+
+        _descriptors.TryAdd(processorName, descriptor);
+
+        return _descriptors[processorName];
+    }
+}
+
+internal class ProcessorRoutingDescriptor
+{
+    public required string ProcessorName { get; set; }
+    public int TotalRoutedEvents { get; set; }
+    public int FailedEvents { get; set; }
+
+    public int SuccessEvents => TotalRoutedEvents - FailedEvents;
+    public decimal MeanFailChance => (decimal)FailedEvents / SuccessEvents;
 }
 
 internal record RoutingResult<TEvent>
