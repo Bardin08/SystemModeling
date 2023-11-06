@@ -51,8 +51,6 @@ internal class EventProcessorStateObserver : IEventProcessorStateObserver
 
     public ProcessorStatisticsDto? GetProcessorStatistics()
     {
-        if (_totalQueueSize is 0 || _totalLoadTime is 0) return null;
-
         return new ProcessorStatisticsDto
         {
             ProcessorId = _processorId,
