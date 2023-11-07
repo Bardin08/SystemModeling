@@ -11,7 +11,7 @@ public class Lab2Runnable : IRunnable
         var simulationProcessor = SimulationProcessorBuilder
             .CreateBuilder()
             .Simulate()
-            .ForSeconds(5)
+            .ForSeconds(10)
             .WithEventGenerator(b =>
             {
                 b.EventsAmount = 25;
@@ -21,7 +21,7 @@ public class Lab2Runnable : IRunnable
             {
                 builder.AddProcessor("processor_1", pb =>
                     {
-                        pb.SetMaxLength(5);
+                        pb.SetMaxLength(1);
                         pb.AddTransition("processor_2", 1);
                     })
                     .UseMultipleConsumers(opt =>
@@ -33,13 +33,13 @@ public class Lab2Runnable : IRunnable
                             {
                                 Alias = "__1_1",
                                 Color = ConsoleColor.Blue,
-                                ProcessingTime = TimeSpan.FromSeconds(2)
+                                ProcessingTime = TimeSpan.FromSeconds(0.2)
                             },
                             new()
                             {
                                 Alias = "__1_2",
                                 Color = ConsoleColor.Blue,
-                                ProcessingTime = TimeSpan.FromSeconds(4)
+                                ProcessingTime = TimeSpan.FromSeconds(0.4)
                             }
                         };
                     });
@@ -53,7 +53,7 @@ public class Lab2Runnable : IRunnable
                             new()
                             {
                                 Alias = "__2_1",
-                                ProcessingTime = TimeSpan.FromSeconds(5),
+                                ProcessingTime = TimeSpan.FromSeconds(0.5),
                                 Color = ConsoleColor.Yellow
                             }
                         };
@@ -68,7 +68,7 @@ public class Lab2Runnable : IRunnable
                             new()
                             {
                                 Alias = "__3_1",
-                                ProcessingTime = TimeSpan.FromSeconds(1),
+                                ProcessingTime = TimeSpan.FromSeconds(0.1),
                                 Color = ConsoleColor.Green
                             }
                         };
