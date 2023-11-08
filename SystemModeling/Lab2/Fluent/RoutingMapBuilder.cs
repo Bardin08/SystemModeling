@@ -4,7 +4,7 @@ using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Fluent;
 
-internal class RoutingMapBuilder : IRoutingMapBuilder
+internal class RoutingMapBuilder : IRoutingMapBuilder, IConsumersBuilderStage
 {
     private readonly List<ProcessorNode> _processorNodes;
     private readonly Dictionary<string, object> _processorOptions;
@@ -21,7 +21,7 @@ internal class RoutingMapBuilder : IRoutingMapBuilder
         return new RoutingMapBuilder(processorOptions);
     }
 
-    public IRoutingMapBuilder AddProcessor(string processorName, Action<IProcessorNodeBuilder> factory)
+    public IConsumersBuilderStage AddProcessor(string processorName, Action<IProcessorNodeBuilder> factory)
     {
         var processorNodeBuilder = new ProcessorNodeBuilder();
         processorNodeBuilder.AddProcessor(processorName);
