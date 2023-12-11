@@ -2,8 +2,9 @@
 
 var executionArgs = new Dictionary<string, object>()
 {
-    { "context", "Lab2: Object oriented mass-serving system imitation." }
+    // { "context", "Lab2: Object oriented mass-serving system imitation." }
+    { "context", "Trumpee - distributed notifications system imitation" }
 };
 
-var lab1Runner = new Lab2Runnable();
-await lab1Runner.RunAsync(executionArgs);
+var runner = new TrumpeeRunnable();
+await runner.RunAsync(executionArgs);
