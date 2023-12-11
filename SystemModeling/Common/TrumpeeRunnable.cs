@@ -1,6 +1,7 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.Fluent.Interfaces;
+using SystemModeling.Lab2.Options;
 using SystemModeling.Trumpee.Configuration;
 
 namespace SystemModeling.Common;
@@ -42,10 +43,18 @@ internal class TrumpeeRunnable : IRunnable
                 pb.AddTransition("validation_failed", options.ValidationFailureChance);
                 pb.AddTransition("validation_passed", options.SuccessChance);
             })
-            .UseSingleConsumer(opt =>
+            .UseConsumers(opt =>
             {
-                opt.Alias = "validation_processor_thread";
-                opt.ProcessingTime = options.AverageValidationTime;
+                opt.ConsumersAmount = 1;
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "validation_processor_thread",
+                        ProcessingTime = options.AverageValidationTime,
+                        Color = ConsoleColor.Cyan
+                    }
+                ];
             });
 
         builder.AddProcessor("validation_dlq", pb => { pb.SetMaxLength(-1); });
