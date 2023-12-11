@@ -46,7 +46,6 @@ internal class TrumpeeRunnable : IRunnable
             })
             .UseConsumers(opt =>
             {
-                opt.ConsumersAmount = 1;
                 opt.ProcessorOptions =
                 [
                     new ImitationProcessorOptions

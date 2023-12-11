@@ -40,7 +40,7 @@ public class EventsGeneratorOptions
     /// <summary>
     /// Represents very first processor at the simulation model
     /// </summary>
-    public string InitialProcessorName { get; init; }
+    public string InitialProcessorName { get; init; } = null!;
 }
 
 public class ValidationNodeOptions
