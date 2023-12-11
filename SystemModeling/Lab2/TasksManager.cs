@@ -13,20 +13,20 @@ internal class TasksManager<TEvent>
     private readonly List<Task> _tasksToRun;
     private readonly IEventsRoutingService<TEvent> _router;
     private readonly IEventsProvider<TEvent> _eventsProvider;
-    private readonly ChannelWriter<EventContext<TEvent>> _eventStoreWriter;
+    private readonly Channel<EventContext<TEvent>, EventContext<TEvent>> _eventsChannel;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public TasksManager(
         IRoutingMapService routingMapService,
         IEventsProvider<TEvent> eventsProvider,
-        Channel<EventContext<TEvent>, EventContext<TEvent>> eventStoreChannel,
+        Channel<EventContext<TEvent>, EventContext<TEvent>> eventsStoreChannel,
         CancellationTokenSource cancellationTokenSource)
     {
-        _eventStoreWriter = eventStoreChannel.Writer;
+        _eventsChannel = eventsStoreChannel;
         _cancellationTokenSource = cancellationTokenSource;
         _eventsProvider = eventsProvider;
 
-        _router = new EventsRoutingService<TEvent>(eventStoreChannel.Reader, routingMapService);
+        _router = new EventsRoutingService<TEvent>(eventsStoreChannel.Reader, routingMapService);
         _tasksToRun = new List<Task>();
     }
 
@@ -34,7 +34,7 @@ internal class TasksManager<TEvent>
     {
         // order matters! Provider -> Router
         var eventsProvider = _eventsProvider.FillWithQueueWithEvents(
-            _eventStoreWriter, _cancellationTokenSource.Token);
+            _eventsChannel.Reader, _eventsChannel.Writer, _cancellationTokenSource.Token);
         var routeMessagesTask = _router.RouteAsync(_cancellationTokenSource.Token);
 
         _tasksToRun.AddRange(new[] { eventsProvider, routeMessagesTask });
@@ -43,14 +43,11 @@ internal class TasksManager<TEvent>
 
     public CreateProcessorResultDto<TEvent> AddImitationProcessor(object options, ProcessorNode processorNode)
     {
-        var imitationThreadResult = CreateImitationThread(options, processorNode);
+        var threadInfo = CreateImitationThread(options, processorNode);
+        _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.ChannelWriter);
+        _tasksToRun.Add(threadInfo.ThreadExecutable);
 
-        _router.AddRoute(imitationThreadResult.ThreadId.ToString(),
-            imitationThreadResult.ChannelWriter);
-
-        _tasksToRun.Add(imitationThreadResult.ThreadExecutable);
-
-        return imitationThreadResult;
+        return threadInfo;
     }
 
     private CreateProcessorResultDto<TEvent> CreateImitationThread(
@@ -63,8 +60,8 @@ internal class TasksManager<TEvent>
             _ => throw new ArgumentOutOfRangeException(nameof(routingNode), routingNode, null)
         };
 
-        var imitationProcessor = new EventsProcessorWithMultipleConsumers<TEvent>(
-            _eventStoreWriter, channel.Reader, options, _cancellationTokenSource);
+        var imitationProcessor = new EventsProcessor<TEvent>(
+            _eventsChannel.Writer, channel.Reader, options, _cancellationTokenSource);
 
         var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId);
         imitationProcessor.RegisterObserver(statisticsObserver);

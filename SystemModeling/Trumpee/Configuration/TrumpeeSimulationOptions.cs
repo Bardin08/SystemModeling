@@ -8,7 +8,8 @@ public class TrumpeeSimulationOptions
         EventsGenerator = new EventsGeneratorOptions
         {
             Delay = TimeSpan.FromSeconds(1),
-            TotalEventsAmount = int.MaxValue
+            TotalEventsAmount = 1000,
+            InitialProcessorName = "validation"
         },
         Validation = new ValidationNodeOptions
         {
@@ -35,6 +36,11 @@ public class EventsGeneratorOptions
     /// Represents total amount of events that will be generated
     /// </summary>
     public int TotalEventsAmount { get; init; }
+
+    /// <summary>
+    /// Represents very first processor at the simulation model
+    /// </summary>
+    public string InitialProcessorName { get; init; }
 }
 
 public class ValidationNodeOptions

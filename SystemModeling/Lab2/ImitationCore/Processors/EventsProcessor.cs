@@ -3,11 +3,11 @@ using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
 
-internal class EventsProcessorWithMultipleConsumers<TEvent> : ProcessorBase<TEvent>
+internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
 {
     private ProcessorWithMultipleConsumersOptions ProcessorOptions { get; }
 
-    public EventsProcessorWithMultipleConsumers(
+    public EventsProcessor(
         ChannelWriter<EventContext<TEvent>> routerQueue,
         ChannelReader<EventContext<TEvent>> processorQueue,
         object processorOptions,

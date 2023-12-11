@@ -61,7 +61,10 @@ internal sealed class SimulationProcessor
     private static void PrintProcessorStatistics(
         Dictionary<Func<ProcessorStatisticsDto>, Func<ProcessorRoutingDescriptor>?> statisticsCollectors)
     {
-        if (!statisticsCollectors.Any()) return;
+        if (statisticsCollectors.Count == 0)
+        {
+            return;
+        }
 
         var sb = new StringBuilder();
         foreach (var statsInfo in statisticsCollectors)

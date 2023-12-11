@@ -4,4 +4,5 @@ internal record EventProviderOptions
 {
     public int EventsAmount { get; set; }
     public TimeSpan AddDelay { get; set; }
+    public string ProcessorName { get; set; }
 }

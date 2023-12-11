@@ -10,7 +10,7 @@ internal class TrumpeeRunnable : IRunnable
 {
     private static readonly TrumpeeSimulationOptions SimulationOptions = TrumpeeSimulationOptions.Default;
 
-    public async Task RunAsync(Dictionary<string, object> args)
+    public Task RunAsync(Dictionary<string, object> args)
     {
         var trumpeeModel = SimulationProcessorBuilder.CreateBuilder()
             .Simulate()
@@ -19,11 +19,12 @@ internal class TrumpeeRunnable : IRunnable
             {
                 epBuilder.AddDelay = SimulationOptions.EventsGenerator.Delay;
                 epBuilder.EventsAmount = SimulationOptions.EventsGenerator.TotalEventsAmount;
+                epBuilder.ProcessorName = SimulationOptions.EventsGenerator.InitialProcessorName;
             })
             .AndRoutingMap(BuildRoutingMap)
             .Build();
 
-        await trumpeeModel.RunImitationAsync();
+        return trumpeeModel.RunImitationAsync();
     }
 
     private void BuildRoutingMap(IRoutingMapBuilder builder)
@@ -57,10 +58,10 @@ internal class TrumpeeRunnable : IRunnable
                 ];
             });
 
-        builder.AddProcessor("validation_dlq", pb => { pb.SetMaxLength(-1); });
+        builder.AddProcessor("validation_dlq", pb => { pb.SetMaxLength(100); });
 
-        builder.AddProcessor("validation_failed", pb => { pb.SetMaxLength(-1); });
+        builder.AddProcessor("validation_failed", pb => { pb.SetMaxLength(100); });
 
-        builder.AddProcessor("validation_passed", pb => { pb.SetMaxLength(-1); });
+        builder.AddProcessor("validation_passed", pb => { pb.SetMaxLength(100); });
     }
 }
