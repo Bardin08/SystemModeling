@@ -57,10 +57,39 @@ internal class TrumpeeRunnable : IRunnable
                 ];
             });
 
-        builder.AddProcessor("validation_dlq", pb => { pb.SetMaxLength(100); });
+        builder.AddProcessor("validation_dlq", _ => { })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "validation_processor_dlq",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.DarkRed
+                    }
+                ]);
 
-        builder.AddProcessor("validation_failed", pb => { pb.SetMaxLength(100); });
+        builder.AddProcessor("validation_failed", _ => { })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "validation_processor_failed",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.Red
+                    }
+                ]);
 
-        builder.AddProcessor("validation_passed", pb => { pb.SetMaxLength(100); });
+        builder.AddProcessor("validation_passed", _ => { })
+            .UseConsumers(opt => opt.ProcessorOptions =
+            [
+                new ImitationProcessorOptions
+                {
+                    Alias = "validation_complete",
+                    ProcessingTime = TimeSpan.Zero,
+                    Color = ConsoleColor.Yellow
+                }
+            ]);
     }
 }
