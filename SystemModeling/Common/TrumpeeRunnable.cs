@@ -29,7 +29,69 @@ internal class TrumpeeRunnable : IRunnable
 
     private void BuildRoutingMap(IRoutingMapBuilder builder)
     {
+        AddTemplateFilling(builder);
         AddValidation(builder);
+    }
+
+    private void AddTemplateFilling(IRoutingMapBuilder builder)
+    {
+        var options = SimulationOptions.Validation;
+
+        builder.AddProcessor("template-filling", pb =>
+            {
+                pb.SetMaxLength(options.MaxQueue);
+
+                pb.AddTransition("template-filling_dlq", options.RoutingFailureChance);
+                pb.AddTransition("template-filling_failed", options.ValidationFailureChance);
+                pb.AddTransition("template-filling_passed", options.SuccessChance);
+            })
+            .UseConsumers(opt =>
+            {
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "template-filling_processor_thread",
+                        ProcessingTime = options.AverageValidationTime,
+                        Color = ConsoleColor.Cyan
+                    }
+                ];
+            });
+
+        builder.AddProcessor("template-filling_dlq", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "template-filling_processor_dlq",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.DarkRed
+                    }
+                ]);
+
+        builder.AddProcessor("template-filling_failed", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "template-filling_processor_failed",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.Red
+                    }
+                ]);
+
+        builder.AddProcessor("template-filling_passed", pb => { pb.AddTransition("validation", 1); })
+            .UseConsumers(opt => opt.ProcessorOptions =
+            [
+                new ImitationProcessorOptions
+                {
+                    Alias = "template-filling_complete",
+                    ProcessingTime = TimeSpan.Zero,
+                    Color = ConsoleColor.Yellow
+                }
+            ]);
     }
 
     private void AddValidation(IRoutingMapBuilder builder)
@@ -52,12 +114,12 @@ internal class TrumpeeRunnable : IRunnable
                     {
                         Alias = "validation_processor_thread",
                         ProcessingTime = options.AverageValidationTime,
-                        Color = ConsoleColor.Cyan
+                        Color = ConsoleColor.DarkMagenta
                     }
                 ];
             });
 
-        builder.AddProcessor("validation_dlq", _ => { })
+        builder.AddProcessor("validation_dlq", pb => { pb.AddTransition("complete", 1); })
             .UseConsumers(opt =>
                 opt.ProcessorOptions =
                 [
@@ -69,7 +131,7 @@ internal class TrumpeeRunnable : IRunnable
                     }
                 ]);
 
-        builder.AddProcessor("validation_failed", _ => { })
+        builder.AddProcessor("validation_failed", pb => { pb.AddTransition("complete", 1); })
             .UseConsumers(opt =>
                 opt.ProcessorOptions =
                 [
@@ -81,7 +143,7 @@ internal class TrumpeeRunnable : IRunnable
                     }
                 ]);
 
-        builder.AddProcessor("validation_passed", _ => { })
+        builder.AddProcessor("validation_passed", pb => { pb.AddTransition("complete", 1); })
             .UseConsumers(opt => opt.ProcessorOptions =
             [
                 new ImitationProcessorOptions

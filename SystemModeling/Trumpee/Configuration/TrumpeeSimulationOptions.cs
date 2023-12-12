@@ -9,9 +9,16 @@ public class TrumpeeSimulationOptions
         {
             Delay = TimeSpan.FromSeconds(1),
             TotalEventsAmount = 1000,
-            InitialProcessorName = "validation"
+            InitialProcessorName = "template-filling"
         },
-        Validation = new ValidationNodeOptions
+        TemplateFilling = new ProcessorNodeOptions
+        {
+            MaxQueue = int.MaxValue,
+            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            RoutingFailureChance = Math.Pow(10, -5),
+            ValidationFailureChance = 0.01
+        },
+        Validation = new ProcessorNodeOptions
         {
             MaxQueue = int.MaxValue,
             AverageValidationTime = TimeSpan.FromSeconds(0.5),
@@ -22,7 +29,8 @@ public class TrumpeeSimulationOptions
 
     public int DurationSeconds { get; init; }
     public EventsGeneratorOptions EventsGenerator { get; init; } = null!;
-    public ValidationNodeOptions Validation { get; init; } = null!;
+    public ProcessorNodeOptions Validation { get; init; } = null!;
+    public ProcessorNodeOptions TemplateFilling { get; init; } = null!;
 }
 
 public class EventsGeneratorOptions
@@ -43,7 +51,7 @@ public class EventsGeneratorOptions
     public string InitialProcessorName { get; init; } = null!;
 }
 
-public class ValidationNodeOptions
+public class ProcessorNodeOptions
 {
     /// <summary>
     /// Represents max queue length for validation node
