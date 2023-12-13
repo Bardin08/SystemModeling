@@ -32,6 +32,7 @@ internal class TrumpeeRunnable : IRunnable
         AddTemplateFilling(builder);
         AddValidation(builder);
         AddPrioritization(builder);
+        AddTransportHub(builder);
     }
 
     private void AddTemplateFilling(IRoutingMapBuilder builder)
