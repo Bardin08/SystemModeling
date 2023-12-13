@@ -31,11 +31,12 @@ internal class TrumpeeRunnable : IRunnable
     {
         AddTemplateFilling(builder);
         AddValidation(builder);
+        AddPrioritization(builder);
     }
 
     private void AddTemplateFilling(IRoutingMapBuilder builder)
     {
-        var options = SimulationOptions.Validation;
+        var options = SimulationOptions.TemplateFilling;
 
         builder.AddProcessor("template-filling", pb =>
             {
@@ -143,12 +144,134 @@ internal class TrumpeeRunnable : IRunnable
                     }
                 ]);
 
-        builder.AddProcessor("validation_passed", pb => { pb.AddTransition("complete", 1); })
+        builder.AddProcessor("validation_passed", pb => { pb.AddTransition("prioritize", 1); })
             .UseConsumers(opt => opt.ProcessorOptions =
             [
                 new ImitationProcessorOptions
                 {
                     Alias = "validation_complete",
+                    ProcessingTime = TimeSpan.Zero,
+                    Color = ConsoleColor.Yellow
+                }
+            ]);
+    }
+
+    private void AddPrioritization(IRoutingMapBuilder builder)
+    {
+        var options = SimulationOptions.Prioritization;
+
+        builder.AddProcessor("prioritize", pb =>
+            {
+                pb.SetMaxLength(options.MaxQueue);
+
+                pb.AddTransition("prioritize_dlq", options.RoutingFailureChance);
+                pb.AddTransition("prioritize_failed", options.ValidationFailureChance);
+                pb.AddTransition("prioritize_passed", options.SuccessChance);
+            })
+            .UseConsumers(opt =>
+            {
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "prioritize_processor_thread",
+                        ProcessingTime = options.AverageValidationTime,
+                        Color = ConsoleColor.Cyan
+                    }
+                ];
+            });
+
+        builder.AddProcessor("prioritize_dlq", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "prioritize_processor_dlq",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.DarkRed
+                    }
+                ]);
+
+        builder.AddProcessor("prioritize_failed", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "prioritize_processor_failed",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.Red
+                    }
+                ]);
+
+        builder.AddProcessor("prioritize_passed", pb => { pb.AddTransition("transport-hub", 1); })
+            .UseConsumers(opt => opt.ProcessorOptions =
+            [
+                new ImitationProcessorOptions
+                {
+                    Alias = "prioritize_complete",
+                    ProcessingTime = TimeSpan.Zero,
+                    Color = ConsoleColor.Yellow
+                }
+            ]);
+    }
+
+    private void AddTransportHub(IRoutingMapBuilder builder)
+    {
+        var options = SimulationOptions.TransportHub;
+
+        builder.AddProcessor("transport-hub", pb =>
+            {
+                pb.SetMaxLength(options.MaxQueue);
+
+                pb.AddTransition("transport-hub_dlq", options.RoutingFailureChance);
+                pb.AddTransition("transport-hub_failed", options.ValidationFailureChance);
+                pb.AddTransition("transport-hub_passed", options.SuccessChance);
+            })
+            .UseConsumers(opt =>
+            {
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "transport-hub_processor_thread",
+                        ProcessingTime = options.AverageValidationTime,
+                        Color = ConsoleColor.Cyan
+                    }
+                ];
+            });
+
+        builder.AddProcessor("transport-hub_dlq", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "transport-hub_processor_dlq",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.DarkRed
+                    }
+                ]);
+
+        builder.AddProcessor("transport-hub_failed", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt =>
+                opt.ProcessorOptions =
+                [
+                    new ImitationProcessorOptions
+                    {
+                        Alias = "transport-hub_processor_failed",
+                        ProcessingTime = TimeSpan.Zero,
+                        Color = ConsoleColor.Red
+                    }
+                ]);
+
+        builder.AddProcessor("transport-hub_passed", pb => { pb.AddTransition("complete", 1); })
+            .UseConsumers(opt => opt.ProcessorOptions =
+            [
+                new ImitationProcessorOptions
+                {
+                    Alias = "transport-hub_complete",
                     ProcessingTime = TimeSpan.Zero,
                     Color = ConsoleColor.Yellow
                 }

@@ -24,6 +24,13 @@ public class TrumpeeSimulationOptions
             AverageValidationTime = TimeSpan.FromSeconds(0.5),
             RoutingFailureChance = Math.Pow(10, -5),
             ValidationFailureChance = 0.01
+        },
+        Prioritization = new ProcessorNodeOptions
+        {
+            MaxQueue = int.MaxValue,
+            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            RoutingFailureChance = Math.Pow(10, -5),
+            ValidationFailureChance = 0.01
         }
     };
 
@@ -31,6 +38,8 @@ public class TrumpeeSimulationOptions
     public EventsGeneratorOptions EventsGenerator { get; init; } = null!;
     public ProcessorNodeOptions Validation { get; init; } = null!;
     public ProcessorNodeOptions TemplateFilling { get; init; } = null!;
+    public ProcessorNodeOptions Prioritization { get; init; } = null!;
+    public ProcessorNodeOptions TransportHub { get; init; } = null!;
 }
 
 public class EventsGeneratorOptions
