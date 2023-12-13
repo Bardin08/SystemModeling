@@ -10,6 +10,5 @@ internal interface IRoutingMapBuilder
 
 internal interface IConsumersBuilderStage
 {
-    void UseSingleConsumer(Action<ImitationProcessorOptions> factory);
-    void UseMultipleConsumers(Action<ProcessorWithMultipleConsumersOptions> factory);
+    void UseConsumers(Action<ProcessorWithMultipleConsumersOptions> factory);
 }

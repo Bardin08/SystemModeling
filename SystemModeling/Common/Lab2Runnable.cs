@@ -16,6 +16,7 @@ public class Lab2Runnable : IRunnable
             {
                 b.EventsAmount = 25;
                 b.AddDelay = TimeSpan.FromSeconds(0.05);
+                b.ProcessorName = "processor_1";
             })
             .AndRoutingMap(builder =>
             {
@@ -24,9 +25,8 @@ public class Lab2Runnable : IRunnable
                         pb.SetMaxLength(1);
                         pb.AddTransition("processor_2", 1);
                     })
-                    .UseMultipleConsumers(opt =>
+                    .UseConsumers(opt =>
                     {
-                        opt.ConsumersAmount = 2;
                         opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()
@@ -45,9 +45,8 @@ public class Lab2Runnable : IRunnable
                     });
 
                 builder.AddProcessor("processor_2", pb => { pb.AddTransition("processor_3", 1); })
-                    .UseMultipleConsumers(opt =>
+                    .UseConsumers(opt =>
                     {
-                        opt.ConsumersAmount = 1;
                         opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()
@@ -60,9 +59,8 @@ public class Lab2Runnable : IRunnable
                     });
 
                 builder.AddProcessor("processor_3", bp => { bp.AddTransition("complete", 1); })
-                    .UseMultipleConsumers(opt =>
+                    .UseConsumers(opt =>
                     {
-                        opt.ConsumersAmount = 1;
                         opt.ProcessorOptions = new List<ImitationProcessorOptions>
                         {
                             new()

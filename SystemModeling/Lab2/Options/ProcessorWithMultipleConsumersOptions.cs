@@ -2,6 +2,6 @@
 
 internal record ProcessorWithMultipleConsumersOptions
 {
-    public List<ImitationProcessorOptions> ProcessorOptions { get; set; } = new();
-    public int ConsumersAmount { get; set; }
+    public List<ImitationProcessorOptions> ProcessorOptions { get; set; } = [];
+    public int ConsumersAmount => ProcessorOptions.Count;
 }

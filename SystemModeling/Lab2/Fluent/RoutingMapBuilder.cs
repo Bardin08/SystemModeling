@@ -32,19 +32,7 @@ internal class RoutingMapBuilder : IRoutingMapBuilder, IConsumersBuilderStage
         return this;
     }
 
-    public void UseSingleConsumer(Action<ImitationProcessorOptions> factory)
-    {
-        if (_currentProcessorNode is null)
-        {
-            throw new Exception("There is no configured processors");
-        }
-
-        var options = new ImitationProcessorOptions();
-        factory(options);
-        _processorOptions.Add(_currentProcessorNode.Name!, options);
-    }
-
-    public void UseMultipleConsumers(
+    public void UseConsumers(
         Action<ProcessorWithMultipleConsumersOptions> factory)
     {
         if (_currentProcessorNode is null)
