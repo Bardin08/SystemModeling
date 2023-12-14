@@ -17,9 +17,10 @@ internal class TrumpeeRunnable : IRunnable
             .ForSeconds(SimulationOptions.DurationSeconds)
             .WithEventGenerator(epBuilder =>
             {
-                epBuilder.AddDelay = SimulationOptions.EventsGenerator.Delay;
-                epBuilder.EventsAmount = SimulationOptions.EventsGenerator.TotalEventsAmount;
-                epBuilder.ProcessorName = SimulationOptions.EventsGenerator.InitialProcessorName;
+                var options = SimulationOptions.EventsGenerator;
+                epBuilder.AddDelay = options.Delay;
+                epBuilder.EventsAmount = options.TotalEventsAmount;
+                epBuilder.ProcessorName = options.InitialProcessorName;
             })
             .AndRoutingMap(BuildRoutingMap)
             .Build();

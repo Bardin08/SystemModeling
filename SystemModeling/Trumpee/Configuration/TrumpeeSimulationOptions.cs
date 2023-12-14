@@ -31,6 +31,13 @@ public class TrumpeeSimulationOptions
             AverageValidationTime = TimeSpan.FromSeconds(0.5),
             RoutingFailureChance = Math.Pow(10, -5),
             ValidationFailureChance = 0.01
+        },
+        TransportHub = new ProcessorNodeOptions
+        {
+            MaxQueue = int.MaxValue,
+            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            RoutingFailureChance = Math.Pow(10, -5),
+            ValidationFailureChance = 0.01
         }
     };
 
