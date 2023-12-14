@@ -37,7 +37,7 @@ public class LinearBackoff : IBackoffStrategy
     public TimeSpan GetBackoff()
     {
         var delayMs = Random.Shared.Next(
-            _minDelay.Milliseconds, _maxDelay.Milliseconds);
+            (int)_minDelay.TotalMilliseconds, (int)_maxDelay.TotalMilliseconds);
 
         return TimeSpan.FromMilliseconds(delayMs);
     }

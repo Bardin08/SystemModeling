@@ -25,8 +25,8 @@ public class FancyFeaturesRunnable : IRunnable
                         // TODO: move to fluent API
                         var processingTimeOptions = new LinearBackoffOptions
                         {
-                            MinDelay = TimeSpan.FromMilliseconds(10),
-                            MaxDelay = TimeSpan.FromMilliseconds(100)
+                            MinDelay = TimeSpan.FromSeconds(0.1),
+                            MaxDelay = TimeSpan.FromSeconds(1)
                         };
 
                         cb.ProcessorOptions =

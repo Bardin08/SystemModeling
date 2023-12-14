@@ -55,7 +55,7 @@ internal class TrumpeeRunnable : IRunnable
                     new ImitationProcessorOptions
                     {
                         Alias = "template-filling_processor_thread",
-                        ProcessingTime = options.AverageValidationTime,
+                        ProcessingTimeProvider = options.ProcessingTimeProvider,
                         Color = ConsoleColor.Cyan
                     }
                 ];
@@ -116,7 +116,7 @@ internal class TrumpeeRunnable : IRunnable
                     new ImitationProcessorOptions
                     {
                         Alias = "validation_processor_thread",
-                        ProcessingTime = options.AverageValidationTime,
+                        ProcessingTimeProvider = options.ProcessingTimeProvider,
                         Color = ConsoleColor.DarkMagenta
                     }
                 ];
@@ -177,7 +177,7 @@ internal class TrumpeeRunnable : IRunnable
                     new ImitationProcessorOptions
                     {
                         Alias = "prioritize_processor_thread",
-                        ProcessingTime = options.AverageValidationTime,
+                        ProcessingTimeProvider = options.ProcessingTimeProvider,
                         Color = ConsoleColor.Cyan
                     }
                 ];
@@ -238,7 +238,7 @@ internal class TrumpeeRunnable : IRunnable
                     new ImitationProcessorOptions
                     {
                         Alias = "transport-hub_processor_thread",
-                        ProcessingTime = options.AverageValidationTime,
+                        ProcessingTimeProvider = options.ProcessingTimeProvider,
                         Color = ConsoleColor.Cyan
                     }
                 ];
