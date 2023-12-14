@@ -1,4 +1,6 @@
-﻿namespace SystemModeling.Lab2.Options;
+﻿using SystemModeling.Lab2.ImitationCore.Backoffs;
+
+namespace SystemModeling.Lab2.Options;
 
 internal record ProcessorWithMultipleConsumersOptions
 {

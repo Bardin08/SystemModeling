@@ -6,5 +6,5 @@ var executionArgs = new Dictionary<string, object>()
     { "context", "Trumpee - distributed notifications system imitation" }
 };
 
-var runner = new TrumpeeRunnable();
+var runner = new FancyFeaturesRunnable();
 await runner.RunAsync(executionArgs);

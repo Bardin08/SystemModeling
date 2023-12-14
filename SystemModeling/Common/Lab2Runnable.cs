@@ -1,6 +1,6 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2.Fluent;
-using SystemModeling.Lab2.Options;
+using SystemModeling.Lab2.ImitationCore.Backoffs;
 
 namespace SystemModeling.Common;
 

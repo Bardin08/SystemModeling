@@ -1,4 +1,5 @@
-﻿using SystemModeling.Lab2.Options;
+﻿using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
@@ -54,6 +55,7 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
 
                 if (ProcessorQueue.TryRead(out var @event))
                 {
+                    // TODO: is it required at the base processor?
                     ProcessingTime = options.ProcessingTime;
 
                     const string format = "{0} ({1}): Event: {2}";
@@ -77,9 +79,10 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
                     }
 
                     Notify();
-                }
 
-                await Task.Delay(options.ProcessingTime, CancellationToken.None);
+                    var processing = options.ProcessingTimeProvider?.GetBackoff() ?? ProcessingTime;
+                    await Task.Delay(processing, CancellationToken.None);
+                }
             }
         }, ct);
     }

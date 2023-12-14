@@ -1,7 +1,7 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.Fluent.Interfaces;
-using SystemModeling.Lab2.Options;
+using SystemModeling.Lab2.ImitationCore.Backoffs;
 using SystemModeling.Trumpee.Configuration;
 
 namespace SystemModeling.Common;
