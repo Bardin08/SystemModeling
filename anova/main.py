@@ -6,16 +6,10 @@ import pandas as pd
 directory_path = "experiments"
 
 
-# Function to parse milliseconds from time string
-def parse_milliseconds(time_str):
-    hh, mm, ss, ms = map(int, time_str.split(':')[-1].split('.')[0].split(":") + time_str.split('.')[-1].split('0'))
-    return hh * 3600000 + mm * 60000 + ss * 1000 + ms
-
-
 # Function to read and parse JSON files
 def read_and_parse_json_files(directory_path):
     all_data = []
-    for filename in sorted(os.listdir(directory_path))[:10]:  # Process only the first 10 JSON files
+    for filename in sorted(os.listdir(directory_path)):
         if filename.endswith(".json"):
             file_path = os.path.join(directory_path, filename)
             with open(file_path, 'r') as file:
@@ -29,6 +23,7 @@ def read_and_parse_json_files(directory_path):
 
                 for result in data["Result"]:
                     processor = result["Processor"]
+                    processor_name = processor["ProcessorName"]
                     mead_queue_length = processor["MeadQueueLength"]
                     mean_load_time = processor["MeanLoadTime"]
                     router = result["Router"]
@@ -39,6 +34,7 @@ def read_and_parse_json_files(directory_path):
                         "DurationSeconds": duration_seconds,
                         "DelayMilliseconds": delay_milliseconds,
                         "TotalEventsAmount": total_events_amount,
+                        "ProcessorName": processor_name,
                         "MaxQueue": max_queue,
                         "FailureChance": failure_chance,
                         "MeadQueueLength": mead_queue_length,
