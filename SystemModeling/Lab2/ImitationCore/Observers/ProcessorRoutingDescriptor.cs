@@ -7,5 +7,8 @@ internal class ProcessorRoutingDescriptor
     public int FailedEvents { get; set; }
 
     public int SuccessEvents => TotalRoutedEvents - FailedEvents;
-    public decimal MeanFailChance => (decimal)FailedEvents / SuccessEvents;
+
+    public decimal MeanFailChance => SuccessEvents is 0
+        ? 0
+        : (decimal)FailedEvents / SuccessEvents;
 }

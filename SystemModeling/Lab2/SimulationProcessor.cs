@@ -26,44 +26,50 @@ internal sealed class SimulationProcessor
             _cancellationTokenSource);
     }
 
-    public async Task RunImitationAsync()
+    public async Task<Dictionary<Func<ProcessorStatisticsDto>, Func<ProcessorRoutingDescriptor>?>> RunImitationAsync()
     {
-        _cancellationTokenSource.CancelAfter(_options.SimulationTimeSeconds);
-
         var collectors = new Dictionary<Func<ProcessorStatisticsDto>, Func<ProcessorRoutingDescriptor>?>();
 
-        ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
-        foreach (var descriptor in _options.ProcessorDescriptors)
+        try
         {
-            var processorNode = _options.RoutingMap!
-                .FirstOrDefault(n => n.Name == descriptor.Key);
-            ArgumentNullException.ThrowIfNull(processorNode);
+            _cancellationTokenSource.CancelAfter(_options.SimulationTimeSeconds);
 
-            var processorInfo = _threadsManager
-                .AddImitationProcessor(descriptor.Value, processorNode);
+            ArgumentNullException.ThrowIfNull(_options.ProcessorDescriptors);
+            foreach (var descriptor in _options.ProcessorDescriptors)
+            {
+                var processorNode = _options.RoutingMap!
+                    .FirstOrDefault(n => n.Name == descriptor.Key);
+                ArgumentNullException.ThrowIfNull(processorNode);
 
-            ArgumentNullException.ThrowIfNull(processorNode);
-            processorNode.RouteId = processorInfo.ThreadId.ToString();
+                var processorInfo = _threadsManager
+                    .AddImitationProcessor(descriptor.Value, processorNode);
 
-            var processorStats = processorInfo.GetProcessorStatsFunc;
-            var routerStats = processorInfo.RoutingStatsFunc;
+                ArgumentNullException.ThrowIfNull(processorNode);
+                processorNode.RouteId = processorInfo.ThreadId.ToString();
 
-            collectors.Add(processorStats!, routerStats);
+                var processorStats = processorInfo.GetProcessorStatsFunc;
+                var routerStats = processorInfo.RoutingStatsFunc;
+
+                collectors.Add(processorStats!, routerStats);
+            }
+
+            await _threadsManager.RunAllAsync();
+        }
+        catch
+        {
+            // ignored
         }
 
-        await _threadsManager.RunAllAsync();
-
-        PrintProcessorStatistics(collectors);
-
-        await Task.CompletedTask;
+        return collectors;
+        // PrintProcessorStatistics(collectors);
     }
 
-    private static void PrintProcessorStatistics(
+    private static string PrintProcessorStatistics(
         Dictionary<Func<ProcessorStatisticsDto>, Func<ProcessorRoutingDescriptor>?> statisticsCollectors)
     {
         if (statisticsCollectors.Count == 0)
         {
-            return;
+            return "";
         }
 
         var sb = new StringBuilder();
@@ -71,22 +77,31 @@ internal sealed class SimulationProcessor
         {
             var (processorMetrics, routerMetrics) = (statsInfo.Key(), statsInfo.Value!());
 
+            if (routerMetrics.SuccessEvents is 0 || (bool)processorMetrics.ProcessorName?.EndsWith("passed"))
+            {
+                continue;
+            }
+
             if (processorMetrics is null || routerMetrics is null)
             {
                 Console.WriteLine("No info received");
                 continue;
             }
 
-            sb.Append($"ThreadId: {processorMetrics.ProcessorId}").AppendLine()
+            sb.Append($"ThreadId: {processorMetrics.ProcessorId}:{processorMetrics.ProcessorName}").AppendLine()
                 .Append($"Mean Queue Size: {processorMetrics.MeadQueueLength}").AppendLine()
                 .Append($"Mean Load Time: {processorMetrics.MeanLoadTime}").AppendLine()
-                .Append($"Failure Chance: {routerMetrics.MeanFailChance}").AppendLine();
-
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine(sb.ToString());
-            Console.ResetColor();
-
-            sb.Clear();
+                .Append($"Success: {routerMetrics.SuccessEvents}").AppendLine()
+                .Append($"Failed: {routerMetrics.FailedEvents}").AppendLine()
+                .Append($"Failure Chance: {routerMetrics.MeanFailChance}").AppendLine()
+                .AppendLine();
         }
+
+        var str = sb.ToString();
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.WriteLine(str);
+        Console.ResetColor();
+
+        return str;
     }
 }

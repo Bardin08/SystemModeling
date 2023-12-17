@@ -1,6 +1,6 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2.Fluent;
-using SystemModeling.Lab2.Options;
+using SystemModeling.Lab2.ImitationCore.Backoffs;
 
 namespace SystemModeling.Common;
 
@@ -14,8 +14,12 @@ public class Lab2Runnable : IRunnable
             .ForSeconds(10)
             .WithEventGenerator(b =>
             {
+                b.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
+                {
+                    MinDelay = TimeSpan.FromMilliseconds(10),
+                    MaxDelay = TimeSpan.FromMilliseconds(100)
+                });
                 b.EventsAmount = 25;
-                b.AddDelay = TimeSpan.FromSeconds(0.05);
                 b.ProcessorName = "processor_1";
             })
             .AndRoutingMap(builder =>

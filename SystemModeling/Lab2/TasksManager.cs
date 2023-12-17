@@ -32,21 +32,40 @@ internal class TasksManager<TEvent>
 
     public Task RunAllAsync()
     {
-        // order matters! Provider -> Router
-        var eventsProvider = _eventsProvider.FillWithQueueWithEvents(
-            _eventsChannel.Reader, _eventsChannel.Writer, _cancellationTokenSource.Token);
-        var routeMessagesTask = _router.RouteAsync(_cancellationTokenSource.Token);
-
-        _tasksToRun.AddRange(new[] { eventsProvider, routeMessagesTask });
+        AddInternalThreads();
         return Task.WhenAll(_tasksToRun);
     }
 
-    public CreateProcessorResultDto<TEvent> AddImitationProcessor(object options, ProcessorNode processorNode)
+    private void AddInternalThreads()
+    {
+        // order matters! Provider -> Router
+        _tasksToRun.AddRange(new[]
+        {
+            GetEventsGeneratorThread(),
+            GetEventsRoutingThread()
+        });
+    }
+
+    private Task GetEventsGeneratorThread()
+    {
+        return _eventsProvider.FillWithQueueWithEvents(
+            _eventsChannel.Reader,
+            _eventsChannel.Writer,
+            _cancellationTokenSource.Token);
+    }
+
+    private Task GetEventsRoutingThread()
+    {
+        return _router.RouteAsync(_cancellationTokenSource.Token);
+    }
+
+    public CreateProcessorResultDto<TEvent> AddImitationProcessor(
+        object options, ProcessorNode processorNode)
     {
         var threadInfo = CreateImitationThread(options, processorNode);
         _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.ChannelWriter);
         _tasksToRun.Add(threadInfo.ThreadExecutable);
-
+        
         return threadInfo;
     }
 
@@ -63,7 +82,7 @@ internal class TasksManager<TEvent>
         var imitationProcessor = new EventsProcessor<TEvent>(
             _eventsChannel.Writer, channel.Reader, options, _cancellationTokenSource);
 
-        var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId);
+        var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId, routingNode.Name);
         imitationProcessor.RegisterObserver(statisticsObserver);
 
         var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);

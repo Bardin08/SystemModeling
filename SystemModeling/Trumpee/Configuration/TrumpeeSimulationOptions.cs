@@ -1,34 +1,51 @@
-﻿namespace SystemModeling.Trumpee.Configuration;
+﻿using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Lab2.ImitationCore.Interfaces;
+
+namespace SystemModeling.Trumpee.Configuration;
 
 public class TrumpeeSimulationOptions
 {
+    public static IBackoffStrategy DefaultBackoffStrategy
+        => new LinearBackoff(new LinearBackoffOptions
+        {
+            MinDelay = TimeSpan.FromMilliseconds(20),
+            MaxDelay = TimeSpan.FromMilliseconds(70)
+        });
+
     public static TrumpeeSimulationOptions Default => new()
     {
-        DurationSeconds = 300,
+        DurationSeconds = 5,
         EventsGenerator = new EventsGeneratorOptions
         {
-            Delay = TimeSpan.FromSeconds(1),
-            TotalEventsAmount = 1000,
+            Delay = TimeSpan.FromMilliseconds(1),
+            TotalEventsAmount = 10,
             InitialProcessorName = "template-filling"
         },
         TemplateFilling = new ProcessorNodeOptions
         {
             MaxQueue = int.MaxValue,
-            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            ProcessingTimeProvider = DefaultBackoffStrategy,
             RoutingFailureChance = Math.Pow(10, -5),
             ValidationFailureChance = 0.01
         },
         Validation = new ProcessorNodeOptions
         {
             MaxQueue = int.MaxValue,
-            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            ProcessingTimeProvider = DefaultBackoffStrategy,
             RoutingFailureChance = Math.Pow(10, -5),
             ValidationFailureChance = 0.01
         },
         Prioritization = new ProcessorNodeOptions
         {
             MaxQueue = int.MaxValue,
-            AverageValidationTime = TimeSpan.FromSeconds(0.5),
+            ProcessingTimeProvider = DefaultBackoffStrategy,
+            RoutingFailureChance = Math.Pow(10, -5),
+            ValidationFailureChance = 0.01
+        },
+        TransportHub = new ProcessorNodeOptions
+        {
+            MaxQueue = int.MaxValue,
+            ProcessingTimeProvider = DefaultBackoffStrategy,
             RoutingFailureChance = Math.Pow(10, -5),
             ValidationFailureChance = 0.01
         }
@@ -67,10 +84,8 @@ public class ProcessorNodeOptions
     /// </summary>
     public int MaxQueue { get; init; }
 
-    /// <summary>
-    /// Represents an average time required to validate one event
-    /// </summary>
-    public TimeSpan AverageValidationTime { get; init; }
+    [JsonIgnore]
+    public IBackoffStrategy ProcessingTimeProvider { get; set; } = null!;
 
     public double ValidationFailureChance { get; set; }
     public double RoutingFailureChance { get; set; }

@@ -1,4 +1,5 @@
-﻿using SystemModeling.Lab2.Options;
+﻿using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Lab2.Options;
 using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.ImitationCore.Processors;
@@ -54,11 +55,10 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
 
                 if (ProcessorQueue.TryRead(out var @event))
                 {
-                    ProcessingTime = options.ProcessingTime;
+                    var processing = options.ProcessingTimeProvider?.GetBackoff() ?? ProcessingTime;
+                    ProcessingTime = processing;
 
-                    const string format = "{0} ({1}): Event: {2}";
-                    sb.AppendFormat(format, ProcessorId, options.Alias,
-                        JsonConvert.SerializeObject(@event));
+                    await Task.Delay(processing, CancellationToken.None);
 
                     try
                     {
@@ -69,17 +69,8 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
                         break;
                     }
 
-                    if (sb.Length > 0)
-                    {
-                        Console.ForegroundColor = options.Color;
-                        Console.WriteLine(sb.ToString());
-                        Console.ResetColor();
-                    }
-
                     Notify();
                 }
-
-                await Task.Delay(options.ProcessingTime, CancellationToken.None);
             }
         }, ct);
     }

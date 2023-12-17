@@ -1,8 +1,10 @@
-﻿namespace SystemModeling.Lab2.Options;
+﻿using SystemModeling.Lab2.ImitationCore.Interfaces;
+
+namespace SystemModeling.Lab2.Options;
 
 internal record EventProviderOptions
 {
     public int EventsAmount { get; set; }
-    public TimeSpan AddDelay { get; set; }
-    public string ProcessorName { get; set; }
+    public IBackoffStrategy BackoffProvider { get; set; } = null!;
+    public string ProcessorName { get; set; } = null!;
 }
