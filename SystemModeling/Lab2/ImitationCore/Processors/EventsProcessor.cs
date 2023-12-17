@@ -55,12 +55,10 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
 
                 if (ProcessorQueue.TryRead(out var @event))
                 {
-                    // TODO: is it required at the base processor?
-                    ProcessingTime = options.ProcessingTime;
+                    var processing = options.ProcessingTimeProvider?.GetBackoff() ?? ProcessingTime;
+                    ProcessingTime = processing;
 
-                    const string format = "{0} ({1}): Event: {2}";
-                    sb.AppendFormat(format, ProcessorId, options.Alias,
-                        JsonConvert.SerializeObject(@event));
+                    await Task.Delay(processing, CancellationToken.None);
 
                     try
                     {
@@ -71,17 +69,7 @@ internal class EventsProcessor<TEvent> : ProcessorBase<TEvent>
                         break;
                     }
 
-                    if (sb.Length > 0)
-                    {
-                        Console.ForegroundColor = options.Color;
-                        Console.WriteLine(sb.ToString());
-                        Console.ResetColor();
-                    }
-
                     Notify();
-
-                    var processing = options.ProcessingTimeProvider?.GetBackoff() ?? ProcessingTime;
-                    await Task.Delay(processing, CancellationToken.None);
                 }
             }
         }, ct);

@@ -3,6 +3,7 @@
 internal record ProcessorStatisticsDto
 {
     public required Guid ProcessorId { get; init; }
+    public string? ProcessorName { get; set; }
     public int TotalQueueSize { get; init; }
     public int QueueSizeObservations { get; init; }
     public double TotalLoadTime { get; init; }

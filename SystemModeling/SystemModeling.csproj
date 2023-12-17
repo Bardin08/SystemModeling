@@ -11,4 +11,14 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Trumpet.factor_experiment.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Experiments\"/>
+    </ItemGroup>
+
 </Project>

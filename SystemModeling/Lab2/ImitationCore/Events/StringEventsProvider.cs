@@ -25,23 +25,20 @@ internal class StringEventsProvider : IEventsProvider<string>
             {
                 try
                 {
-                    var isWrote = events.TryWrite(
+                    await events.WriteAsync(
                         new EventContext<string>
                         {
                             EventId = i.ToString(),
                             NextProcessorName = _eventProviderOptions.ProcessorName,
                             Event = $"Event generated at the {i} iteration"
-                        });
-
-                    Console.WriteLine("Writing event to queue. Result: {0}", isWrote);
-                    Console.WriteLine("Queue size: {0}", reader.Count);
+                        }, cancellationToken);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
 
-                await Task.Delay(_eventProviderOptions.AddDelay, cancellationToken);
+                await Task.Delay(_eventProviderOptions.BackoffProvider.GetBackoff(), cancellationToken);
             }
         }, cancellationToken);
     }

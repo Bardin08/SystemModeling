@@ -65,7 +65,7 @@ internal class TasksManager<TEvent>
         var threadInfo = CreateImitationThread(options, processorNode);
         _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.ChannelWriter);
         _tasksToRun.Add(threadInfo.ThreadExecutable);
-
+        
         return threadInfo;
     }
 
@@ -82,7 +82,7 @@ internal class TasksManager<TEvent>
         var imitationProcessor = new EventsProcessor<TEvent>(
             _eventsChannel.Writer, channel.Reader, options, _cancellationTokenSource);
 
-        var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId);
+        var statisticsObserver = new EventProcessorStateObserver(imitationProcessor.ProcessorId, routingNode.Name);
         imitationProcessor.RegisterObserver(statisticsObserver);
 
         var task = imitationProcessor.ProcessAsync(_cancellationTokenSource.Token);

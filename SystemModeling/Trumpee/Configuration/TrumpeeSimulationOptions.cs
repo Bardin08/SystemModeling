@@ -8,17 +8,17 @@ public class TrumpeeSimulationOptions
     public static IBackoffStrategy DefaultBackoffStrategy
         => new LinearBackoff(new LinearBackoffOptions
         {
-            MinDelay = TimeSpan.FromSeconds(0.1),
-            MaxDelay = TimeSpan.FromSeconds(1)
+            MinDelay = TimeSpan.FromMilliseconds(20),
+            MaxDelay = TimeSpan.FromMilliseconds(70)
         });
 
     public static TrumpeeSimulationOptions Default => new()
     {
-        DurationSeconds = 300,
+        DurationSeconds = 5,
         EventsGenerator = new EventsGeneratorOptions
         {
-            Delay = TimeSpan.FromSeconds(1),
-            TotalEventsAmount = 1000,
+            Delay = TimeSpan.FromMilliseconds(1),
+            TotalEventsAmount = 10,
             InitialProcessorName = "template-filling"
         },
         TemplateFilling = new ProcessorNodeOptions
@@ -84,6 +84,7 @@ public class ProcessorNodeOptions
     /// </summary>
     public int MaxQueue { get; init; }
 
+    [JsonIgnore]
     public IBackoffStrategy ProcessingTimeProvider { get; set; } = null!;
 
     public double ValidationFailureChance { get; set; }

@@ -13,8 +13,12 @@ public class FancyFeaturesRunnable : IRunnable
             .ForSeconds(300)
             .WithEventGenerator(epBuilder =>
             {
-                epBuilder.AddDelay = TimeSpan.FromSeconds(0.5);
-                epBuilder.EventsAmount = 10;
+                epBuilder.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
+                {
+                    MinDelay = TimeSpan.FromMilliseconds(10),
+                    MaxDelay = TimeSpan.FromMilliseconds(100)
+                });
+                epBuilder.EventsAmount = 100;
                 epBuilder.ProcessorName = "init";
             })
             .AndRoutingMap(rb =>
@@ -25,8 +29,8 @@ public class FancyFeaturesRunnable : IRunnable
                         // TODO: move to fluent API
                         var processingTimeOptions = new LinearBackoffOptions
                         {
-                            MinDelay = TimeSpan.FromSeconds(0.1),
-                            MaxDelay = TimeSpan.FromSeconds(1)
+                            MinDelay = TimeSpan.Zero,
+                            MaxDelay = TimeSpan.FromMilliseconds(2)
                         };
 
                         cb.ProcessorOptions =

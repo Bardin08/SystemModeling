@@ -2,30 +2,57 @@
 using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.Fluent.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Trumpee;
 using SystemModeling.Trumpee.Configuration;
 
 namespace SystemModeling.Common;
 
 internal class TrumpeeRunnable : IRunnable
 {
-    private static readonly TrumpeeSimulationOptions SimulationOptions = TrumpeeSimulationOptions.Default;
+    private static TrumpeeSimulationOptions _simulationOptions = TrumpeeSimulationOptions.Default;
 
-    public Task RunAsync(Dictionary<string, object> args)
+
+    public async Task RunAsync(Dictionary<string, object> args)
     {
+        var runSetup = (args["simulation_setup"] as FactorExperiment)!; // SimulationOptions;
+        Console.WriteLine($"Experiment {args["execution"]}. Experiment name: {runSetup.Name}");
+
+        _simulationOptions = runSetup.Configurations!;
         var trumpeeModel = SimulationProcessorBuilder.CreateBuilder()
             .Simulate()
-            .ForSeconds(SimulationOptions.DurationSeconds)
+            .ForSeconds(_simulationOptions.DurationSeconds)
             .WithEventGenerator(epBuilder =>
             {
-                var options = SimulationOptions.EventsGenerator;
-                epBuilder.AddDelay = options.Delay;
+                var options = _simulationOptions.EventsGenerator;
+
+                epBuilder.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
+                {
+                    MinDelay = TimeSpan.FromMilliseconds(10),
+                    MaxDelay = TimeSpan.FromMilliseconds(100)
+                });
                 epBuilder.EventsAmount = options.TotalEventsAmount;
                 epBuilder.ProcessorName = options.InitialProcessorName;
             })
             .AndRoutingMap(BuildRoutingMap)
             .Build();
 
-        return trumpeeModel.RunImitationAsync();
+
+        var resultsCollectors = await trumpeeModel.RunImitationAsync();
+        var resultObject = new
+        {
+            SimulationConfig = runSetup,
+            Timestamp = DateTime.Now.ToShortTimeString(),
+            Result = resultsCollectors
+                .Select(collector => new
+                {
+                    Processor = collector.Key(),
+                    Router = collector.Value!()
+                }).ToList()
+        };
+
+        await using var sw = File.CreateText($"../../../Experiments/{DateTime.Now.Ticks}.json");
+        await sw.WriteAsync(JsonConvert.SerializeObject(resultObject));
+        sw.Close();
     }
 
     private void BuildRoutingMap(IRoutingMapBuilder builder)
@@ -38,7 +65,7 @@ internal class TrumpeeRunnable : IRunnable
 
     private void AddTemplateFilling(IRoutingMapBuilder builder)
     {
-        var options = SimulationOptions.TemplateFilling;
+        var options = _simulationOptions.TemplateFilling;
 
         builder.AddProcessor("template-filling", pb =>
             {
@@ -99,7 +126,7 @@ internal class TrumpeeRunnable : IRunnable
 
     private void AddValidation(IRoutingMapBuilder builder)
     {
-        var options = SimulationOptions.Validation;
+        var options = _simulationOptions.Validation;
 
         builder.AddProcessor("validation", pb =>
             {
@@ -160,7 +187,7 @@ internal class TrumpeeRunnable : IRunnable
 
     private void AddPrioritization(IRoutingMapBuilder builder)
     {
-        var options = SimulationOptions.Prioritization;
+        var options = _simulationOptions.Prioritization;
 
         builder.AddProcessor("prioritize", pb =>
             {
@@ -221,7 +248,7 @@ internal class TrumpeeRunnable : IRunnable
 
     private void AddTransportHub(IRoutingMapBuilder builder)
     {
-        var options = SimulationOptions.TransportHub;
+        var options = _simulationOptions.TransportHub;
 
         builder.AddProcessor("transport-hub", pb =>
             {
