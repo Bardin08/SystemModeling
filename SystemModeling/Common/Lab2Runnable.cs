@@ -14,12 +14,12 @@ public class Lab2Runnable : IRunnable
             .ForSeconds(10)
             .WithEventGenerator(b =>
             {
-                b.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
+                b.EventsAmount = 25;
+                b.BackoffProvider = new LinearBackoff(new LinearBackoffOptions()
                 {
                     MinDelay = TimeSpan.FromMilliseconds(10),
                     MaxDelay = TimeSpan.FromMilliseconds(100)
                 });
-                b.EventsAmount = 25;
                 b.ProcessorName = "processor_1";
             })
             .AndRoutingMap(builder =>
@@ -31,49 +31,50 @@ public class Lab2Runnable : IRunnable
                     })
                     .UseConsumers(opt =>
                     {
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
-                        {
-                            new()
+                        opt.ProcessorOptions =
+                        [
+                            new ImitationProcessorOptions
                             {
                                 Alias = "__1_1",
                                 Color = ConsoleColor.Blue,
                                 ProcessingTime = TimeSpan.FromSeconds(0.2)
                             },
-                            new()
+
+                            new ImitationProcessorOptions
                             {
                                 Alias = "__1_2",
                                 Color = ConsoleColor.Blue,
                                 ProcessingTime = TimeSpan.FromSeconds(0.4)
                             }
-                        };
+                        ];
                     });
 
                 builder.AddProcessor("processor_2", pb => { pb.AddTransition("processor_3", 1); })
                     .UseConsumers(opt =>
                     {
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
-                        {
-                            new()
+                        opt.ProcessorOptions =
+                        [
+                            new ImitationProcessorOptions
                             {
                                 Alias = "__2_1",
                                 ProcessingTime = TimeSpan.FromSeconds(0.5),
                                 Color = ConsoleColor.Yellow
                             }
-                        };
+                        ];
                     });
 
                 builder.AddProcessor("processor_3", bp => { bp.AddTransition("complete", 1); })
                     .UseConsumers(opt =>
                     {
-                        opt.ProcessorOptions = new List<ImitationProcessorOptions>
-                        {
-                            new()
+                        opt.ProcessorOptions =
+                        [
+                            new ImitationProcessorOptions
                             {
                                 Alias = "__3_1",
                                 ProcessingTime = TimeSpan.FromSeconds(0.1),
                                 Color = ConsoleColor.Green
                             }
-                        };
+                        ];
                     });
             })
             .Build();
