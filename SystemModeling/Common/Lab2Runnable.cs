@@ -26,7 +26,7 @@ public class Lab2Runnable : IRunnable
             {
                 builder.AddProcessor("processor_1", pb =>
                     {
-                        pb.SetMaxLength(1);
+                        pb.SetMaxProcessorQueueLength(1);
                         pb.AddTransition("processor_2", 1);
                     })
                     .UseConsumers(opt =>
