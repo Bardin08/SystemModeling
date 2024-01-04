@@ -17,8 +17,8 @@ public class Lab3Runnable : IRunnable
             {
                 b.EventsAmount = 25;
                 b.ProcessorName = "processor_1";
-                b.BackoffProvider = new LinearBackoff(
-                    new LinearBackoffOptions(
+                b.BackoffProvider = new NormalBackoff(
+                    new NormalBackoffOptions(
                         TimeSpan.FromMilliseconds(10),
                         TimeSpan.FromMilliseconds(100)));
             })

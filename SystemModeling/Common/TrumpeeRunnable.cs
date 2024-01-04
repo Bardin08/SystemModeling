@@ -27,8 +27,8 @@ internal class TrumpeeRunnable : IRunnable
 
                 epBuilder.EventsAmount = options.TotalEventsAmount;
                 epBuilder.ProcessorName = options.InitialProcessorName;
-                epBuilder.BackoffProvider = new LinearBackoff(
-                    new LinearBackoffOptions(
+                epBuilder.BackoffProvider = new NormalBackoff(
+                    new NormalBackoffOptions(
                         TimeSpan.FromMilliseconds(10),
                         TimeSpan.FromMilliseconds(100)));
             })

@@ -2,6 +2,6 @@
 
 namespace SystemModeling.Lab2.Options.Backoffs;
 
-internal record LinearBackoffOptions(
+internal record NormalBackoffOptions(
     TimeSpan MinDelay,
     TimeSpan MaxDelay) : IBackoffOptions;

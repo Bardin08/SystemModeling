@@ -7,8 +7,8 @@ namespace SystemModeling.Trumpee.Configuration;
 public class TrumpeeSimulationOptions
 {
     private static IBackoffStrategy DefaultBackoffStrategy
-        => new LinearBackoff(
-            new LinearBackoffOptions(
+        => new NormalBackoff(
+            new NormalBackoffOptions(
                 TimeSpan.FromMilliseconds(20),
                 TimeSpan.FromMilliseconds(70)));
 

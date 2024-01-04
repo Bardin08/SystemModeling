@@ -14,8 +14,8 @@ public class FancyFeaturesRunnable : IRunnable
             .ForSeconds(300)
             .WithEventGenerator(epBuilder =>
             {
-                epBuilder.BackoffProvider = new LinearBackoff(
-                    new LinearBackoffOptions(
+                epBuilder.BackoffProvider = new NormalBackoff(
+                    new NormalBackoffOptions(
                         TimeSpan.FromMilliseconds(10),
                         TimeSpan.FromMilliseconds(100)));
 
@@ -28,7 +28,7 @@ public class FancyFeaturesRunnable : IRunnable
                     .UseConsumers(cb =>
                     {
                         // TODO: move to fluent API
-                        var processingTimeOptions = new LinearBackoffOptions(
+                        var processingTimeOptions = new NormalBackoffOptions(
                             TimeSpan.Zero,
                             TimeSpan.FromMilliseconds(2));
 
@@ -36,7 +36,7 @@ public class FancyFeaturesRunnable : IRunnable
                         [
                             new ImitationProcessorOptions
                             {
-                                ProcessingTimeProvider = new LinearBackoff(processingTimeOptions),
+                                ProcessingTimeProvider = new NormalBackoff(processingTimeOptions),
                                 Alias = "init_thread",
                                 Color = ConsoleColor.Magenta
                             }

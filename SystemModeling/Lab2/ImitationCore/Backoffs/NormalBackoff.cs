@@ -3,16 +3,16 @@ using SystemModeling.Lab2.Options.Backoffs;
 
 namespace SystemModeling.Lab2.ImitationCore.Backoffs;
 
-public class LinearBackoff : IBackoffStrategy
+public class NormalBackoff : IBackoffStrategy
 {
     private readonly TimeSpan _minDelay;
     private readonly TimeSpan _maxDelay;
 
-    public LinearBackoff(object options)
+    public NormalBackoff(object options)
     {
-        if (options is not LinearBackoffOptions linearOptions)
+        if (options is not NormalBackoffOptions linearOptions)
         {
-            throw new ArgumentException($"Invalid options type. Options must be {nameof(LinearBackoffOptions)}");
+            throw new ArgumentException($"Invalid options type. Options must be {nameof(NormalBackoffOptions)}");
         }
 
         if (linearOptions.MinDelay < TimeSpan.Zero)
@@ -37,9 +37,8 @@ public class LinearBackoff : IBackoffStrategy
 
     public TimeSpan GetBackoff()
     {
-        var stepSize = (_maxDelay - _minDelay).TotalMilliseconds;
-        var step = Random.Shared.Next(0, (int)(stepSize + 1));
-        var delayMs = _minDelay.TotalMilliseconds + step * stepSize;
+        var delayMs = Random.Shared.Next(
+            (int)_minDelay.TotalMilliseconds, (int)_maxDelay.TotalMilliseconds);
 
         return TimeSpan.FromMilliseconds(delayMs);
     }
