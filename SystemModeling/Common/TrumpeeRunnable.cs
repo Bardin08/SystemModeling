@@ -2,6 +2,7 @@
 using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.Fluent.Interfaces;
 using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Lab2.Options.Backoffs;
 using SystemModeling.Trumpee;
 using SystemModeling.Trumpee.Configuration;
 
@@ -24,13 +25,12 @@ internal class TrumpeeRunnable : IRunnable
             {
                 var options = _simulationOptions.EventsGenerator;
 
-                epBuilder.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
-                {
-                    MinDelay = TimeSpan.FromMilliseconds(10),
-                    MaxDelay = TimeSpan.FromMilliseconds(100)
-                });
                 epBuilder.EventsAmount = options.TotalEventsAmount;
                 epBuilder.ProcessorName = options.InitialProcessorName;
+                epBuilder.BackoffProvider = new LinearBackoff(
+                    new LinearBackoffOptions(
+                        TimeSpan.FromMilliseconds(10),
+                        TimeSpan.FromMilliseconds(100)));
             })
             .AndRoutingMap(BuildRoutingMap)
             .Build();

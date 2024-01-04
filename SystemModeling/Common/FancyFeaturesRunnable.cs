@@ -1,6 +1,7 @@
 ﻿using SystemModeling.Common.Interfaces;
 using SystemModeling.Lab2.Fluent;
 using SystemModeling.Lab2.ImitationCore.Backoffs;
+using SystemModeling.Lab2.Options.Backoffs;
 
 namespace SystemModeling.Common;
 
@@ -13,11 +14,11 @@ public class FancyFeaturesRunnable : IRunnable
             .ForSeconds(300)
             .WithEventGenerator(epBuilder =>
             {
-                epBuilder.BackoffProvider = new LinearBackoff(new LinearBackoffOptions
-                {
-                    MinDelay = TimeSpan.FromMilliseconds(10),
-                    MaxDelay = TimeSpan.FromMilliseconds(100)
-                });
+                epBuilder.BackoffProvider = new LinearBackoff(
+                    new LinearBackoffOptions(
+                        TimeSpan.FromMilliseconds(10),
+                        TimeSpan.FromMilliseconds(100)));
+
                 epBuilder.EventsAmount = 100;
                 epBuilder.ProcessorName = "init";
             })
@@ -27,11 +28,9 @@ public class FancyFeaturesRunnable : IRunnable
                     .UseConsumers(cb =>
                     {
                         // TODO: move to fluent API
-                        var processingTimeOptions = new LinearBackoffOptions
-                        {
-                            MinDelay = TimeSpan.Zero,
-                            MaxDelay = TimeSpan.FromMilliseconds(2)
-                        };
+                        var processingTimeOptions = new LinearBackoffOptions(
+                            TimeSpan.Zero,
+                            TimeSpan.FromMilliseconds(2));
 
                         cb.ProcessorOptions =
                         [
