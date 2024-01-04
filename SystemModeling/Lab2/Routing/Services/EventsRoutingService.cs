@@ -18,7 +18,7 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
     {
         _handlers = new ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>>();
 
-        _routingPolicy = new RouteRoutingPolicy<TEvent>(
+        _routingPolicy = new PriorityRoutingPolicy<TEvent>(
             routingMapService, eventStoreReader, _handlers);
 
         _routingObserver = new RoutingObserver<TEvent>();

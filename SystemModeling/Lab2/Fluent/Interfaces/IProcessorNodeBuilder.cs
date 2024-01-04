@@ -7,6 +7,7 @@ internal interface IProcessorNodeBuilder
     /// </summary>
     /// <param name="maxLength">The maximum length of the queue. Use -1 for an unbounded queue.</param>
     /// <returns>Returns an instance of IProcessorNodeBuilder for method chaining.</returns>
-    IProcessorNodeBuilder SetMaxLength(int maxLength = -1);
-    IProcessorNodeBuilder AddTransition(string nextProcessor, double chance);
+    IProcessorNodeBuilder SetMaxProcessorQueueLength(int maxLength = -1);
+
+    IProcessorNodeBuilder AddTransition(string nextProcessor, double? chance = null, int? priority = null);
 }
