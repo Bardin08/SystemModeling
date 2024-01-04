@@ -6,5 +6,5 @@ public class ProcessorNode
     public string? RouteId { get; set; }
     public int MaxQueueLength { get; set; } = -1;
 
-    public List<TransitionNode> Transitions { get; init; } = new();
+    public PriorityQueue<TransitionNode, int?> Transitions { get; init; } = new();
 }

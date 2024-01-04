@@ -11,7 +11,6 @@ internal class TrumpeeRunnable : IRunnable
 {
     private static TrumpeeSimulationOptions _simulationOptions = TrumpeeSimulationOptions.Default;
 
-
     public async Task RunAsync(Dictionary<string, object> args)
     {
         var runSetup = (args["simulation_setup"] as FactorExperiment)!; // SimulationOptions;
@@ -69,7 +68,7 @@ internal class TrumpeeRunnable : IRunnable
 
         builder.AddProcessor("template-filling", pb =>
             {
-                pb.SetMaxLength(options.MaxQueue);
+                pb.SetMaxProcessorQueueLength(options.MaxQueue);
 
                 pb.AddTransition("template-filling_dlq", options.RoutingFailureChance);
                 pb.AddTransition("template-filling_failed", options.ValidationFailureChance);
@@ -130,7 +129,7 @@ internal class TrumpeeRunnable : IRunnable
 
         builder.AddProcessor("validation", pb =>
             {
-                pb.SetMaxLength(options.MaxQueue);
+                pb.SetMaxProcessorQueueLength(options.MaxQueue);
 
                 pb.AddTransition("validation_dlq", options.RoutingFailureChance);
                 pb.AddTransition("validation_failed", options.ValidationFailureChance);
@@ -191,7 +190,7 @@ internal class TrumpeeRunnable : IRunnable
 
         builder.AddProcessor("prioritize", pb =>
             {
-                pb.SetMaxLength(options.MaxQueue);
+                pb.SetMaxProcessorQueueLength(options.MaxQueue);
 
                 pb.AddTransition("prioritize_dlq", options.RoutingFailureChance);
                 pb.AddTransition("prioritize_failed", options.ValidationFailureChance);
@@ -252,7 +251,7 @@ internal class TrumpeeRunnable : IRunnable
 
         builder.AddProcessor("transport-hub", pb =>
             {
-                pb.SetMaxLength(options.MaxQueue);
+                pb.SetMaxProcessorQueueLength(options.MaxQueue);
 
                 pb.AddTransition("transport-hub_dlq", options.RoutingFailureChance);
                 pb.AddTransition("transport-hub_failed", options.ValidationFailureChance);

@@ -60,8 +60,8 @@ internal sealed class SimulationProcessor
             // ignored
         }
 
+        PrintProcessorStatistics(collectors);
         return collectors;
-        // PrintProcessorStatistics(collectors);
     }
 
     private static string PrintProcessorStatistics(

@@ -12,27 +12,31 @@ internal class ProcessorNodeBuilder : IProcessorNodeBuilder
         _processorNode = new ProcessorNode
         {
             Name = processor,
-            Transitions = new List<TransitionNode>()
+            Transitions = new PriorityQueue<TransitionNode, int?>()
         };
         return this;
     }
 
     /// <inheritdoc />
-    public IProcessorNodeBuilder SetMaxLength(int maxLength = -1)
+    public IProcessorNodeBuilder SetMaxProcessorQueueLength(int maxLength = -1)
     {
         _processorNode.MaxQueueLength = maxLength;
         return this;
     }
 
-    public IProcessorNodeBuilder AddTransition(string nextProcessor, double chance)
+    public IProcessorNodeBuilder AddTransition(string nextProcessor, double? chance = null, int? priority = null)
     {
-        _processorNode.Transitions
-            .Add(new TransitionNode
-            {
-                Name = $"{_processorNode.Name}-->{nextProcessor}",
-                ProcessorName = nextProcessor,
-                TransitionChance = chance
-            });
+        var transition = new TransitionNode()
+        {
+            Name = $"{_processorNode.Name}-->{nextProcessor}",
+            ProcessorName = nextProcessor,
+            TransitionChance = chance,
+            Priority = priority
+        };
+
+        transition.Validate();
+
+        _processorNode.Transitions.Enqueue(transition, priority);
         return this;
     }
 
