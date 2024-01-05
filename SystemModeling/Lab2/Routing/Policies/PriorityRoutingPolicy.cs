@@ -11,7 +11,7 @@ internal class PriorityRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
     public PriorityRoutingPolicy(
         IRoutingMapService routingMapService,
         ChannelReader<EventContext<TEvent>> eventsStore,
-        ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> handlers)
+        ConcurrentDictionary<string, Channel<EventContext<TEvent>>> handlers)
         : base(eventsStore, handlers)
     {
         _routingMapService = routingMapService;
@@ -32,14 +32,14 @@ internal class PriorityRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
                 continue;
             }
 
-            var processorNode = _routingMapService
-                .GetProcessorNodeByName(eventCtx.NextProcessorName!);
-
             // no need to route it. Processing complete
-            if (processorNode?.Name is "complete")
+            if (eventCtx.NextProcessorName is "complete")
             {
                 continue;
             }
+
+            var processorNode = _routingMapService
+                .GetProcessorNodeByName(eventCtx.NextProcessorName!);
 
             if (processorNode?.RouteId is null)
             {
@@ -49,20 +49,24 @@ internal class PriorityRoutingPolicy<TEvent> : BaseRoutingPolicy<TEvent>
             if (Handlers.TryGetValue(processorNode.RouteId, out var processor))
             {
                 RoutingResult<TEvent>? routingResult;
-                if (processor.TryWrite(eventCtx))
+                if (processor.Writer.TryWrite(eventCtx))
+                {
                     routingResult = new RoutingResult<TEvent>
                     {
                         IsSuccess = true,
                         EventContext = eventCtx,
                         TargetedProcessor = processorNode.Name ?? "name not defined"
                     };
+                }
                 else
+                {
                     routingResult = new RoutingResult<TEvent>
                     {
                         IsSuccess = false,
                         EventContext = eventCtx,
                         TargetedProcessor = processorNode.Name ?? "name not defined"
                     };
+                }
 
                 Notify(routingResult);
             }

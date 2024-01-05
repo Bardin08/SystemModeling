@@ -7,7 +7,7 @@ namespace SystemModeling.Lab2.Routing.Services;
 
 internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
 {
-    private readonly ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> _handlers;
+    private readonly ConcurrentDictionary<string, Channel<EventContext<TEvent>>> _handlers;
 
     private readonly IRoutingPolicy<TEvent> _routingPolicy;
     private readonly RoutingObserver<TEvent> _routingObserver;
@@ -16,7 +16,7 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
         ChannelReader<EventContext<TEvent>> eventStoreReader,
         IRoutingMapService routingMapService)
     {
-        _handlers = new ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>>();
+        _handlers = new ConcurrentDictionary<string, Channel<EventContext<TEvent>>>();
 
         _routingPolicy = new PriorityRoutingPolicy<TEvent>(
             routingMapService, eventStoreReader, _handlers);
@@ -30,9 +30,9 @@ internal class EventsRoutingService<TEvent> : IEventsRoutingService<TEvent>
         return _routingObserver.AddAndGetProcessorStats(processorName);
     }
 
-    public bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter)
+    public bool AddRoute(string routeId, Channel<EventContext<TEvent>> channel)
     {
-        return _handlers.TryAdd(routeId, channelWriter);
+        return _handlers.TryAdd(routeId, channel);
     }
 
     public Task RouteAsync(CancellationToken ct)
