@@ -65,7 +65,7 @@ internal class TasksManager<TEvent>
         var threadInfo = CreateImitationThread(options, processorNode);
         _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.Channel);
         _tasksToRun.Add(threadInfo.ThreadExecutable);
-        
+
         return threadInfo;
     }
 
