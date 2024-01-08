@@ -1,16 +1,16 @@
 ﻿namespace Lab3.BankSimulation;
 
-public record CashierStats(
-    int TotalServed,
-    int TotalRejected,
-    double TotalServingTime,
-    double TotalWaitingTime,
-    int TotalQueueSwap)
+public class CashierStats
 {
+    public int TotalServed { get; set; }
+    public int TotalRejected { get; set; }
+    public int TotalQueueSwaps { get; set; }
+    public double TotalServingTime { get; set; }
+    public double TotalWaitingTime { get; set; }
+
     public double AverageLoadPerCashier => TotalServingTime / TotalServed;
     public double AverageCustomerStayTime => (TotalServingTime + TotalWaitingTime) / TotalServed;
     public double PercentageOfRejectedCustomers => (double)TotalRejected / TotalServed * 100;
-    public int TotalQueueSwaps => TotalQueueSwap;
 
     public double AverageQueueLength => -1;
 }
