@@ -46,15 +46,22 @@ internal class Simulation
 
             ProcessNewClient();
             UpdateQueuesAndService();
-            _cashier1.GetStats();
         }
+
+        PrintFinalStats();
+    }
+
+    private void PrintFinalStats()
+    {
+        _cashier1.PrintStats();
+        _cashier2.PrintStats();
     }
 
     private double GenerateArrivalTime()
     {
         // reversed proportion to mathematical expectation (ME).
         // It ME is 0.5 lambda is 2                        
-        const double lambda = 0.5;
+        const double lambda = 2;
         return -Math.Log(1 - Random.Shared.NextDouble()) / lambda;
     }
 
@@ -95,8 +102,7 @@ internal class Simulation
     {
         _cashier1.DoTick(_currentTime);
         _cashier2.DoTick(_currentTime);
-
-        CheckForQueueSwitch();
+        CheckForQueueSwitch();                
     }
 
     private void CheckForQueueSwitch()

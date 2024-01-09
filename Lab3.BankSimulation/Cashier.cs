@@ -1,15 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Text;
 
 namespace Lab3.BankSimulation;
 
 internal class Cashier(int maxQueueSize)
 {
-    private int _totalServedClients;
-    private double _totalServiceTime;
-    private int _totalRejectedClients;
-    private double _totalWaitTime;
-
+    private readonly CashierStats _stats = new();
     private readonly Deq<Client> _queue = [];
+
     public int QueueSize => _queue.Count;
 
     public bool TryAddClient(Client client, double currentTime)
@@ -33,6 +30,7 @@ internal class Cashier(int maxQueueSize)
             return;
         }
 
+        _stats.TotalQueueSwaps++;
         var lastClient = cashier.DequeueLastClient();
         TryAddClient(lastClient, currentTime);
     }
@@ -44,6 +42,8 @@ internal class Cashier(int maxQueueSize)
 
     public void DoTick(double currentTime)
     {
+        _stats.Ticks++;
+
         if (QueueSize <= 0)
         {
             return;
@@ -61,30 +61,36 @@ internal class Cashier(int maxQueueSize)
         CollectStats(currentClient, currentTime, true);
     }
 
+    public void PrintStats()
+    {
+        var sb = new StringBuilder();
+        sb.Append("\t -==- Cashier stats -==-")
+            .AppendLine()
+            .Append($"Total Serving Time: {_stats.TotalServingTime}").AppendLine()
+            .Append($"Total Waiting Time: {_stats.TotalWaitingTime}").AppendLine()
+            .Append($"Total Served Clients: {_stats.TotalServed}").AppendLine()
+            .Append($"Total Reject Clients: {_stats.TotalRejected}").AppendLine()
+            .Append($"Total Queue Swaps: {_stats.TotalQueueSwaps}").AppendLine()
+            .Append($" \t\t -===- ").AppendLine()
+            .Append($"Average Queue Length: {_stats.AverageQueueLength}").AppendLine()
+            .Append($"Average Customer Stay Time: {_stats.AverageCustomerStayTime}").AppendLine()
+            .Append($"Average Cashier Load: {_stats.AverageLoadPerCashier}").AppendLine()
+            .Append($"Percentage of Rejected Clients: {_stats.PercentageOfRejectedCustomers}").AppendLine();
+        Console.WriteLine(sb.ToString());
+    }
     private void CollectStats(Client client, double currentTime, bool isServed)
     {
+        _stats.TotalQueueLength += QueueSize;
+
         if (isServed)
         {
-            _totalServedClients++;
-            _totalServiceTime += client.ServiceDuration;
-            _totalWaitTime = currentTime - _totalServiceTime;
+            _stats.TotalServed++;
+            _stats.TotalServingTime += client.ServiceDuration;
+            _stats.TotalWaitingTime = currentTime - _stats.TotalServingTime;
         }
         else
         {
-            _totalRejectedClients++;
+            _stats.TotalRejected++;
         }
-    }
-
-    public void GetStats()
-    {
-        var stats = new
-        {
-            _totalServedClients,
-            _totalRejectedClients,
-            _totalServiceTime,
-            _totalWaitTime
-        };
-
-        Console.WriteLine(JsonSerializer.Serialize(stats));
     }
 }
