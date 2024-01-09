@@ -5,7 +5,7 @@ using SystemModeling.Lab2.Options.Backoffs;
 
 namespace SystemModeling.Common;
 
-public class Lab2Runnable : IRunnable
+public class Lab3Runnable : IRunnable
 {
     public Task RunAsync(Dictionary<string, object> args)
     {

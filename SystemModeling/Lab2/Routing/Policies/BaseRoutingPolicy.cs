@@ -5,20 +5,15 @@ using SystemModeling.Lab2.Routing.Models;
 
 namespace SystemModeling.Lab2.Routing.Policies;
 
-internal abstract class BaseRoutingPolicy<TEvent> : IRoutingPolicy<TEvent>
+internal abstract class BaseRoutingPolicy<TEvent>(
+    ChannelReader<EventContext<TEvent>> eventsStore,
+    ConcurrentDictionary<string, Channel<EventContext<TEvent>>> handlers)
+    : IRoutingPolicy<TEvent>
 {
     private readonly List<IObserverTyped<RoutingResult<TEvent>>> _observers = new();
 
-    protected readonly ChannelReader<EventContext<TEvent>> EventsStore;
-    protected readonly ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> Handlers;
-
-    protected BaseRoutingPolicy(
-        ChannelReader<EventContext<TEvent>> eventsStore,
-        ConcurrentDictionary<string, ChannelWriter<EventContext<TEvent>>> handlers)
-    {
-        EventsStore = eventsStore;
-        Handlers = handlers;
-    }
+    protected readonly ChannelReader<EventContext<TEvent>> EventsStore = eventsStore;
+    protected readonly ConcurrentDictionary<string, Channel<EventContext<TEvent>>> Handlers = handlers;
 
     public abstract Task RouteAsync(object? parameters, CancellationToken ct);
 

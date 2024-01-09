@@ -7,7 +7,7 @@ internal interface IEventsRoutingService<TEvent>
 {
     ProcessorRoutingDescriptor RoutingResultObserver(string processorName);
 
-    bool AddRoute(string routeId, ChannelWriter<EventContext<TEvent>> channelWriter);
+    bool AddRoute(string routeId, Channel<EventContext<TEvent>> channel);
 
     Task RouteAsync(CancellationToken ct);
 }

@@ -1,16 +1,16 @@
 ﻿using SystemModeling.Lab2.ImitationCore.Backoffs;
 using SystemModeling.Lab2.ImitationCore.Interfaces;
+using SystemModeling.Lab2.Options.Backoffs;
 
 namespace SystemModeling.Trumpee.Configuration;
 
 public class TrumpeeSimulationOptions
 {
-    public static IBackoffStrategy DefaultBackoffStrategy
-        => new LinearBackoff(new LinearBackoffOptions
-        {
-            MinDelay = TimeSpan.FromMilliseconds(20),
-            MaxDelay = TimeSpan.FromMilliseconds(70)
-        });
+    private static IBackoffStrategy DefaultBackoffStrategy
+        => new NormalBackoff(
+            new NormalBackoffOptions(
+                TimeSpan.FromMilliseconds(20),
+                TimeSpan.FromMilliseconds(70)));
 
     public static TrumpeeSimulationOptions Default => new()
     {
@@ -84,8 +84,7 @@ public class ProcessorNodeOptions
     /// </summary>
     public int MaxQueue { get; init; }
 
-    [JsonIgnore]
-    public IBackoffStrategy ProcessingTimeProvider { get; set; } = null!;
+    [JsonIgnore] public IBackoffStrategy ProcessingTimeProvider { get; set; } = null!;
 
     public double ValidationFailureChance { get; set; }
     public double RoutingFailureChance { get; set; }

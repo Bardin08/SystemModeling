@@ -63,9 +63,9 @@ internal class TasksManager<TEvent>
         object options, ProcessorNode processorNode)
     {
         var threadInfo = CreateImitationThread(options, processorNode);
-        _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.ChannelWriter);
+        _router.AddRoute(threadInfo.ThreadId.ToString(), threadInfo.Channel);
         _tasksToRun.Add(threadInfo.ThreadExecutable);
-        
+
         return threadInfo;
     }
 
@@ -90,7 +90,7 @@ internal class TasksManager<TEvent>
         return new CreateProcessorResultDto<TEvent>
         {
             ThreadId = imitationProcessor.ProcessorId,
-            ChannelWriter = channel.Writer,
+            Channel = channel,
             ThreadExecutable = task,
             GetProcessorStatsFunc = () => (statisticsObserver as IEventProcessorStateObserver)
                 .GetProcessorStatistics()!,
