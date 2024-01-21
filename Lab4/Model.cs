@@ -1,17 +1,10 @@
 ﻿namespace Lab4;
 
-internal class Model
+internal class Model(List<Element> elements)
 {
-    private readonly List<Element> _elements = [];
-
     private double _nextTime;
     private double _currentTime;
     private int _event;
-
-    public Model(List<Element> elements)
-    {
-        _elements = elements;
-    }
 
     public void Simulate(double time)
     {
@@ -19,28 +12,29 @@ internal class Model
         {
             _nextTime = double.MaxValue;
 
-            foreach (var element in _elements
-                         .Where(element => element.NextTime < _nextTime))
-            {
-                _nextTime = element.NextTime;
-                _event = element.Id;
-            }
+            elements.Where(e => e.NextTime < _nextTime)
+                .ToList()
+                .ForEach(e =>
+                {
+                    _nextTime = e.NextTime;
+                    _event = e.Id;
+                });
 
-            Console.WriteLine($"\nIt's time for event in {_elements[_event].Name}" +
+            Console.WriteLine($"\nIt's time for event in {elements[_event].Name}" +
                               $"\nTime = {_nextTime}");
 
-            foreach (var element in _elements)
+            foreach (var element in elements)
             {
                 element.DoStatistics(_nextTime - _currentTime);
             }
 
             _currentTime = _nextTime;
 
-            _elements.ForEach(e => { e.CurrentTime = _currentTime; });
+            elements.ForEach(e => { e.CurrentTime = _currentTime; });
 
-            _elements[_event].OutAct();
+            elements[_event].OutAct();
 
-            _elements.ForEach(e =>
+            elements.ForEach(e =>
             {
                 if (Math.Abs(e.NextTime - _currentTime) < 0.0001)
                 {
@@ -56,13 +50,13 @@ internal class Model
 
     private void PrintInfo()
     {
-        _elements.ForEach(e => e.PrintInfo());
+        elements.ForEach(e => e.PrintInfo());
     }
 
     private void PrintResult()
     {
         Console.WriteLine("\n\t-== RESULTS ==-");
-        _elements.ForEach(e =>
+        elements.ForEach(e =>
         {
             e.PrintResult();
 
