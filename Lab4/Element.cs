@@ -2,20 +2,23 @@
 
 public abstract class Element
 {
-    public string Name { get; set; }
-    public double NextTime { get; set; }
-    public double DelayMean { get; set; }
-    public double DelayDev { get; set; }
-    public string Distribution { get; set; }
-    public int Quantity { get; private set; }
-    public double CurrentTime { get; set; }
-    public int State { get; set; }
-    public static int NextId { get; set; } = 0;
+    private double DelayMean { get; set; }
+
+    public string Name { get; init; }
+    public string Distribution { get; init; }
+    public Element? NextElement { get; init; }
+
     public int Id { get; set; }
+    public double DelayDev { get; set; }
+    public double CurrentTime { get; set; }
 
-    public Element? NextElement { get; set; }
+    protected int State { get; set; }
+    private static int NextId { get; set; }
 
-    public Element(double delay)
+    public int Quantity { get; private set; }
+    public double NextTime { get; protected set; }
+
+    protected Element(double delay)
     {
         NextTime = 0.0;
         DelayMean = delay;
@@ -28,16 +31,7 @@ public abstract class Element
         Name = "element" + Id;
     }
 
-    public virtual void InAct()
-    {
-    }
-
-    public virtual void OutAct()
-    {
-        Quantity++;
-    }
-
-    public double GetDelay()
+    protected double GetDelay()
     {
         return Distribution switch
         {
@@ -48,16 +42,25 @@ public abstract class Element
         };
     }
 
+    public virtual void PrintInfo()
+    {
+        Console.WriteLine(
+            $"{Name}: state = {State}, quantity = {Quantity}, next = {NextTime}");
+    }
+
     public virtual void PrintResult()
     {
         Console.WriteLine(
             $"{Name}: quantity {Quantity}. Loading {DelayMean * Quantity / CurrentTime}");
     }
 
-    public virtual void PrintInfo()
+    public virtual void OutAct()
     {
-        Console.WriteLine(
-            $"{Name}: state = {State}, quantity = {Quantity}, next = {NextTime}");
+        Quantity++;
+    }
+
+    public virtual void InAct()
+    {
     }
 
     public virtual void DoStatistics(double delta)
