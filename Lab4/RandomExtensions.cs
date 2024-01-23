@@ -3,7 +3,9 @@
 public static class RandomExtensions
 {
     /// <summary>
-    ///   Generates normally distributed numbers. Each operation makes two Gaussians for the price of one, and apparently they can be cached or something for better performance, but who cares.
+    /// Generates normally distributed numbers.
+    /// Each operation makes two Gaussians for the price of one,
+    /// and apparently they can be cached or something for better performance, but who cares.
     /// </summary>
     /// <param name="r"></param>
     /// <param name = "mu">Mean of the distribution</param>
